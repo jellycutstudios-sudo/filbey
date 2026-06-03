@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    // Allow unoptimized images from public folder (svgs etc.)
+    dangerouslyAllowSVG: true,
+  },
 };
 
 export default nextConfig;
