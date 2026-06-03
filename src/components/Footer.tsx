@@ -10,9 +10,9 @@ export default function Footer() {
           <Image
             src="/filbeylogo.svg"
             alt="Filbey Fried Chicken & Burgers Chennai Footer Logo"
-            width={120}
-            height={48}
-            className="h-12 w-auto self-start"
+            width={140}
+            height={56}
+            className="h-14 w-auto self-start"
           />
           <p className="text-surface-bright font-body-md text-body-md italic mt-2 opacity-70">
             &ldquo;Feelin&apos; Chilli? It&apos;s Filbey!&rdquo;
