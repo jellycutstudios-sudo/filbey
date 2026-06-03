@@ -32,7 +32,7 @@ const faqJsonLd = {
       name: 'What are your opening hours?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'We are open every day from Monday to Sunday, 11:00 AM to 11:00 PM.',
+        text: 'We are open every day from Monday to Sunday, 11:30 AM to 11:30 PM.',
       },
     },
     {
@@ -112,7 +112,7 @@ export default function Home() {
                 href="/menu"
                 className="bg-primary text-on-primary font-label-lg text-label-lg py-4 px-8 rounded-full shadow-[0_4px_16px_rgba(93,0,12,0.4)] hover:bg-primary-container hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
               >
-                View Menu <span className="material-symbols-outlined">restaurant_menu</span>
+                Dine-In Menu <span className="material-symbols-outlined">restaurant_menu</span>
               </Link>
               <Link
                 href="https://maps.app.goo.gl/w5SU8wuf79VM7HtW9?g_st=iw"
@@ -121,6 +121,45 @@ export default function Home() {
                 className="bg-transparent border-2 border-secondary-container text-secondary-container bg-black/20 backdrop-blur-sm font-label-lg text-label-lg py-4 px-8 rounded-full hover:bg-secondary-container hover:text-on-secondary-container hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
               >
                 Find Us <span className="material-symbols-outlined">location_on</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* About Us Teaser Section */}
+        <section className="py-margin-desktop bg-surface px-margin-mobile md:px-margin-desktop overflow-hidden">
+          <div className="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
+            {/* Image Side */}
+            <div className="lg:col-span-5 relative h-[350px] md:h-[450px] rounded-[24px] overflow-hidden menu-card-shadow">
+              <Image
+                src="/Classic Burgers.png"
+                alt="Filbey Fried Chicken &amp; Burgers Chennai Food Showcase"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            </div>
+
+            {/* Text Side */}
+            <div className="lg:col-span-7 flex flex-col items-start gap-stack-md lg:pl-6">
+              <span className="bg-primary-fixed text-primary font-label-sm text-label-sm px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
+                Our Story
+              </span>
+              <h2 className="font-display text-headline-lg-mobile md:text-headline-lg text-primary uppercase leading-tight">
+                Crafting Chennai's Finest <br />
+                <span className="text-secondary">Fried Chicken &amp; Burgers</span>
+              </h2>
+              <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                At Filbey, we believe in one simple rule: absolute quality. Recognized as the home of the best crispy fried chicken and handcrafted burgers in the city, we prep everything fresh daily. From our secret seasoning blend to the perfectly toasted buns, every bite is crafted to make you fall in love.
+              </p>
+              <p className="font-body-md text-body-md text-on-surface-variant/80">
+                It's not just food—it's a flavor obsession. Chennai's foodies have spoken, and our menu is officially their favorite spot for hot, crunchy, and savory cravings.
+              </p>
+              <Link
+                href="/about"
+                className="mt-2 bg-secondary-container text-on-secondary-container font-label-lg text-label-lg py-4 px-8 rounded-full hover:bg-secondary-fixed hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                Read Our Story <span className="material-symbols-outlined">arrow_right_alt</span>
               </Link>
             </div>
           </div>
@@ -149,8 +188,8 @@ export default function Home() {
         <section className="py-margin-desktop bg-background px-margin-mobile md:px-margin-desktop" id="menu">
           <div className="max-w-container-max mx-auto">
             <div className="flex flex-col items-center text-center mb-stack-lg">
-              <h2 className="font-display text-headline-lg-mobile md:text-display text-primary uppercase">Explore Our Menu</h2>
-              <p className="font-body-lg text-body-lg text-on-surface-variant mt-stack-sm">* GST extra on all items</p>
+              <h2 className="font-display text-headline-lg-mobile md:text-display text-primary uppercase">Explore Our Dine-In Menu</h2>
+              <p className="font-body-lg text-body-lg text-on-surface-variant mt-stack-sm">* GST extra on all items. Dine-in pricing only.</p>
             </div>
 
             {/* Bento Grid */}
@@ -216,7 +255,7 @@ export default function Home() {
               {[
                 { q: 'Where is Filbey located?', a: 'We are located in Perungudi, OMR — Chennai. You can use the map link in our footer to get exact directions.' },
                 { q: 'Is the meat Halal certified?', a: 'Yes, our chicken and all meat preparations are 100% Halal certified.' },
-                { q: 'What are your opening hours?', a: 'We are open every day from Monday to Sunday, 11:00 AM to 11:00 PM.' },
+                { q: 'What are your opening hours?', a: 'We are open every day from Monday to Sunday, 11:30 AM to 11:30 PM.' },
                 { q: 'Do you offer vegetarian options?', a: 'Absolutely! We have dedicated vegetarian options across our menu including Veg Burgers, Paneer Wraps, and Veg Nuggets.' },
               ].map((faq) => (
                 <div key={faq.q} className="bg-white rounded-xl p-6 menu-card-shadow">

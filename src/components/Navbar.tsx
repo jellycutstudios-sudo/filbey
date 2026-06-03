@@ -5,11 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const navLinks = [
+  { label: 'About Us', href: '/about' },
   { label: 'Chicken Meals', href: '/menu#chicken-meals' },
   { label: 'Burgers', href: '/menu#burgers' },
-  { label: 'Wings & Strips', href: '/menu#wings' },
-  { label: 'Wraps & Sides', href: '/menu#wraps' },
-  { label: 'Café & Drinks', href: '/menu#beverages' },
+  { label: 'Wings & Strips', href: '/menu#wings-strips' },
+  { label: 'Wraps & Sides', href: '/menu#wraps-sandwiches' },
+  { label: 'Café & Drinks', href: '/menu#beverages-desserts' },
 ];
 
 interface NavbarProps {
@@ -62,7 +63,7 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
               href="/menu"
               className="hidden lg:flex items-center justify-center bg-primary text-on-primary font-label-lg text-label-lg py-3 px-6 rounded-full hover:bg-primary-container transition-colors shadow-md"
             >
-              Order Now
+              Dine-In Menu
             </Link>
           )}
 
@@ -125,7 +126,7 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
             onClick={() => setOpen(false)}
             className="mt-8 flex items-center justify-center bg-primary text-on-primary font-label-lg text-label-lg py-4 rounded-full hover:bg-primary-container transition-colors shadow-md"
           >
-            Order Now
+            Dine-In Menu
           </Link>
         )}
       </div>

@@ -45,7 +45,7 @@ export default function Footer() {
             Opening Hours
           </h4>
           <p className="text-surface-variant/70 font-body-md text-body-md">
-            Mon - Sun: 11:00 AM - 11:00 PM
+            Mon - Sun: 11:30 AM - 11:30 PM
           </p>
           <div className="flex gap-4 mt-4 md:justify-end">
             {/* WhatsApp */}
@@ -77,9 +77,20 @@ export default function Footer() {
       </div>
 
       {/* Copyright */}
-      <div className="border-t border-surface-variant/20 py-4 text-center">
+      <div className="border-t border-surface-variant/20 py-6 text-center flex flex-col gap-2 items-center justify-center">
         <p className="text-surface-variant/50 font-label-sm text-label-sm">
-          © 2024 Filbey Fried Chicken &amp; Burgers Chennai. All Rights Reserved.
+          © 2026 Filbey Fried Chicken &amp; Burgers Chennai. All Rights Reserved.
+        </p>
+        <p className="text-surface-variant/50 font-label-sm text-label-sm">
+          Made with love by{' '}
+          <Link
+            href="https://www.instagram.com/salman.abu_/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-surface-variant/70 hover:text-secondary-container transition-colors font-medium underline underline-offset-4"
+          >
+            salman abu
+          </Link>
         </p>
       </div>
     </footer>
