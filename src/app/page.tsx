@@ -48,7 +48,7 @@ const faqJsonLd = {
 
 export default function Home() {
   const heroSectionRef = useRef<HTMLElement>(null);
-  const heroBgRef = useRef<HTMLImageElement>(null);
+  const heroBgRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const heroSection = heroSectionRef.current;
@@ -91,13 +91,15 @@ export default function Home() {
           ref={heroSectionRef}
           className="relative w-full h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden"
         >
-          {/* Background Image */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {/* Background Video */}
+          <video
             ref={heroBgRef}
-            src="/Document.png"
+            src="/filbey-video.mp4"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out scale-110"
-            alt="Filbey Fried Chicken Restaurant Chennai Hero Banner"
+            autoPlay
+            loop
+            muted
+            playsInline
           />
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40" />
