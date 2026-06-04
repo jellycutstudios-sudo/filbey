@@ -101,6 +101,7 @@ export default function Home() {
               alt="Filbey Hero Background"
               fill
               priority
+              sizes="100vw"
               className="object-cover"
             />
           </div>
@@ -140,6 +141,7 @@ export default function Home() {
                 src="/Classic Burgers.png"
                 alt="Filbey Fried Chicken &amp; Burgers Chennai Food Showcase"
                 fill
+                sizes="(max-width: 1024px) 100vw, 41vw"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -201,7 +203,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-margin-desktop">
               {/* Signature Chicken - large */}
               <Link href="/menu#signature-chicken" className="md:col-span-8 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
-                <Image src="/Signature Chicken.png" alt="Filbey Signature Fried Chicken Bucket Meal" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Image src="/Signature Chicken.png" alt="Filbey Signature Fried Chicken Bucket Meal" fill sizes="(max-width: 768px) 100vw, 66vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full flex justify-between items-end">
                   <div>
@@ -217,7 +219,7 @@ export default function Home() {
 
               {/* Classic Burgers */}
               <Link href="/menu#burgers" className="md:col-span-4 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
-                <Image src="/Classic Burgers.png" alt="Filbey Classic Dynamite Burger Meal" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Image src="/Classic Burgers.png" alt="Filbey Classic Dynamite Burger Meal" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-6 w-full">
                   <h3 className="font-headline-md text-headline-md text-white uppercase">Classic Burgers</h3>
@@ -227,7 +229,7 @@ export default function Home() {
 
               {/* Signature Shakes */}
               <Link href="/menu#beverages" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
-                <Image src="/Signature Shakes.png" alt="Filbey Signature Lotus Biscoff Milkshake" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Image src="/Signature Shakes.png" alt="Filbey Signature Lotus Biscoff Milkshake" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-6 w-full">
                   <h3 className="font-headline-md text-headline-md text-white uppercase">Signature Shakes</h3>
@@ -237,7 +239,7 @@ export default function Home() {
 
               {/* Wraps & Sides */}
               <Link href="/menu#wraps" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
-                <Image src="/Wraps & Sides.png" alt="Filbey Crispy Chicken Wraps and Loaded Fries Sides" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Image src="/Wraps & Sides.png" alt="Filbey Crispy Chicken Wraps and Loaded Fries Sides" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-6 w-full">
                   <h3 className="font-headline-md text-headline-md text-white uppercase">Wraps &amp; Sides</h3>
