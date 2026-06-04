@@ -48,7 +48,7 @@ const faqJsonLd = {
 
 export default function Home() {
   const heroSectionRef = useRef<HTMLElement>(null);
-  const heroBgRef = useRef<HTMLVideoElement>(null);
+  const heroBgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const heroSection = heroSectionRef.current;
@@ -91,16 +91,19 @@ export default function Home() {
           ref={heroSectionRef}
           className="relative w-full h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden"
         >
-          {/* Background Video */}
-          <video
+          {/* Background Image */}
+          <div
             ref={heroBgRef}
-            src="/filbey-video.mp4"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out scale-110"
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
+            className="absolute inset-0 w-full h-full transition-transform duration-300 ease-out scale-110"
+          >
+            <Image
+              src="/hero-image.jpeg"
+              alt="Filbey Hero Background"
+              fill
+              priority
+              className="object-cover"
+            />
+          </div>
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40" />
           {/* Content */}
