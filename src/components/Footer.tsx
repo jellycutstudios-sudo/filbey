@@ -1,7 +1,12 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="bg-on-surface w-full rounded-t-xl mt-margin-desktop">
       <div className="flex flex-col md:flex-row justify-between gap-gutter px-margin-mobile md:px-margin-desktop py-stack-lg max-w-container-max mx-auto">
@@ -15,7 +20,7 @@ export default function Footer() {
             className="h-14 w-auto self-start"
           />
           <p className="text-surface-bright font-body-md text-body-md italic mt-2 opacity-70">
-            &ldquo;Feelin&apos; Chilli? It&apos;s Filbey!&rdquo;
+            {t('footer.tagline')}
           </p>
           <Link
             href="https://maps.app.goo.gl/w5SU8wuf79VM7HtW9?g_st=iw"
@@ -26,7 +31,7 @@ export default function Footer() {
             <span className="material-symbols-outlined text-secondary-container mt-1">
               location_on
             </span>
-            <p>Perungudi, OMR — Chennai</p>
+            <p>{t('footer.location')}</p>
           </Link>
           <Link
             href="tel:+916383400144"
@@ -42,10 +47,10 @@ export default function Footer() {
         {/* Opening Hours & Socials */}
         <div className="flex flex-col gap-stack-sm mt-stack-md md:mt-0 md:text-right">
           <h4 className="text-surface-bright font-label-lg text-label-lg uppercase mb-2">
-            Opening Hours
+            {t('footer.openingHours')}
           </h4>
           <p className="text-surface-variant/70 font-body-md text-body-md">
-            Mon - Sun: 11:30 AM - 11:30 PM
+            {t('footer.monSun')}
           </p>
           <div className="flex gap-4 mt-4 md:justify-end">
             {/* WhatsApp */}
@@ -79,10 +84,10 @@ export default function Footer() {
       {/* Copyright */}
       <div className="border-t border-surface-variant/20 py-6 text-center flex flex-col gap-2 items-center justify-center">
         <p className="text-surface-variant/50 font-label-sm text-label-sm">
-          © 2026 Filbey Fried Chicken &amp; Burgers Chennai. All Rights Reserved.
+          {t('footer.copyright')}
         </p>
         <p className="text-surface-variant/50 font-label-sm text-label-sm">
-          Made with love by{' '}
+          {t('footer.madeWith')}{' '}
           <Link
             href="https://www.instagram.com/salman.abu_/"
             target="_blank"

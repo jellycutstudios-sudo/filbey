@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Anton, Inter } from "next/font/google";
+import { Anton, Inter, Baloo_Thambi_2 } from "next/font/google";
 import "./globals.css";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 const anton = Anton({
   weight: "400",
@@ -13,6 +14,13 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+});
+
+const balooThambi2 = Baloo_Thambi_2({
+  subsets: ["tamil", "latin"],
+  variable: "--font-baloo-thambi-2",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -94,7 +102,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${anton.variable} ${inter.variable} light`}>
+    <html lang="en" className={`${anton.variable} ${inter.variable} ${balooThambi2.variable} light`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -108,7 +116,9 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background text-on-background antialiased overflow-x-hidden">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
         {/* WhatsApp Floating Button */}
         <a
           href="https://wa.me/916383400144"

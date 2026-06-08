@@ -56,18 +56,6 @@ export default function MenuPage() {
       <Navbar isMenuPage />
 
       <main className="pt-24 pb-margin-desktop">
-        {/* Title */}
-        <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center mb-6 mt-8">
-          <h1 className="font-display text-display text-primary uppercase">Our Dine-In Menu</h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl mx-auto">
-            A Little Crunch. A Lot of Comfort!{' '}
-            <br />
-            <span className="text-sm italic">
-              * GST extra on all items. Dine-in pricing only. Vegetarian options available across menu.
-            </span>
-          </p>
-        </section>
-
         {/* Dynamic Interactive Menu Client Component */}
         <MenuClient />
       </main>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface MenuItem {
   name: string;
@@ -184,7 +185,10 @@ const MENU_DATA: Category[] = [
 ];
 
 export default function MenuClient() {
-  const [activeCategory, setActiveCategory] = useState(MENU_DATA[0].id);
+  const { t, translateMenu } = useLanguage();
+  const menuData = useMemo(() => translateMenu(MENU_DATA), [translateMenu]);
+
+  const [activeCategory, setActiveCategory] = useState(menuData[0]?.id || '');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'VEG' | 'SPICY' | 'POPULAR'>('ALL');
   
@@ -209,7 +213,7 @@ export default function MenuClient() {
 
   // Filter logic
   const filteredMenu = useMemo(() => {
-    return MENU_DATA.map((cat) => {
+    return menuData.map((cat) => {
       const items = cat.items.filter((item) => {
         // Search term matching
         const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -227,7 +231,7 @@ export default function MenuClient() {
 
       return { ...cat, items };
     }).filter((cat) => cat.items.length > 0);
-  }, [searchTerm, activeFilter]);
+  }, [searchTerm, activeFilter, menuData]);
 
   // On mount, read URL hash and scroll to matching category
   useEffect(() => {
@@ -239,7 +243,6 @@ export default function MenuClient() {
       }, 300);
       return () => clearTimeout(timer);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle active scroll highlight
@@ -247,7 +250,7 @@ export default function MenuClient() {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 150; // offset
       
-      for (const cat of MENU_DATA) {
+      for (const cat of menuData) {
         const ref = categoryRefs.current[cat.id];
         if (ref) {
           const top = ref.offsetTop;
@@ -262,10 +265,22 @@ export default function MenuClient() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [menuData]);
 
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mt-4">
+      {/* Title */}
+      <section className="text-center mb-10 mt-4">
+        <h1 className="font-display text-display text-primary uppercase">{t('menu.heroTitle')}</h1>
+        <p className="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl mx-auto">
+          {t('menu.heroDesc')}{' '}
+          <br />
+          <span className="text-sm italic">
+            {t('menu.heroSub')}
+          </span>
+        </p>
+      </section>
+
       {/* Search and Filters Bar */}
       <div className="bg-surface-container/60 backdrop-blur-md sticky top-20 z-40 py-4 px-6 rounded-2xl flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm border border-surface-variant/20 mb-8">
         
@@ -278,7 +293,7 @@ export default function MenuClient() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search our delicious dishes..."
+            placeholder={t('menu.searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 bg-white rounded-full border border-surface-variant/30 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all font-body-md"
           />
           {searchTerm && (
@@ -294,14 +309,14 @@ export default function MenuClient() {
         {/* Filter Pills */}
         <div className="flex flex-wrap gap-2 justify-center w-full md:w-auto">
           {[
-            { id: 'ALL', label: 'Full Menu', icon: 'menu_book' },
-            { id: 'VEG', label: 'Vegetarian 🌱', icon: 'local_pizza' },
-            { id: 'SPICY', label: 'Spicy 🌶️', icon: 'local_fire_department' },
-            { id: 'POPULAR', label: 'Popular ★', icon: 'grade' },
+            { id: 'ALL', label: t('menu.filterAll'), icon: 'menu_book' },
+            { id: 'VEG', label: t('menu.filterVeg'), icon: 'local_pizza' },
+            { id: 'SPICY', label: t('menu.filterSpicy'), icon: 'local_fire_department' },
+            { id: 'POPULAR', label: t('menu.filterPopular'), icon: 'grade' },
           ].map((filter) => (
             <button
               key={filter.id}
-              onClick={() => setActiveFilter(filter.id as any)}
+              onClick={() => setActiveFilter(filter.id as 'ALL' | 'VEG' | 'SPICY' | 'POPULAR')}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-label-lg text-label-lg transition-all cursor-pointer ${
                 activeFilter === filter.id
                   ? 'bg-primary text-white shadow-md scale-105'
@@ -319,10 +334,10 @@ export default function MenuClient() {
         {/* Navigation Sidebar (Desktop Only) */}
         <aside className="hidden lg:block lg:col-span-3 sticky top-[180px] bg-white menu-card-shadow rounded-2xl p-4 border border-surface-variant/10">
           <h3 className="font-headline-md text-xl text-primary uppercase border-b border-surface-variant/20 pb-2 mb-4 px-2">
-            Categories
+            {t('menu.categories')}
           </h3>
           <nav className="flex flex-col gap-1.5">
-            {MENU_DATA.map((cat) => (
+            {menuData.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => scrollToCategory(cat.id)}
@@ -341,7 +356,7 @@ export default function MenuClient() {
 
         {/* Categories Scroller (Mobile Only) */}
         <div className="lg:hidden w-full overflow-x-auto no-scrollbar flex gap-2 pb-4 mb-4 sticky top-[160px] z-30 bg-background py-2">
-          {MENU_DATA.map((cat) => (
+          {menuData.map((cat) => (
             <button
               key={cat.id}
               onClick={() => scrollToCategory(cat.id)}
@@ -364,9 +379,9 @@ export default function MenuClient() {
               <span className="material-symbols-outlined text-6xl text-primary/30 mb-4">
                 sentiment_dissatisfied
               </span>
-              <h3 className="font-headline-md text-2xl text-on-surface">No dishes found</h3>
+              <h3 className="font-headline-md text-2xl text-on-surface">{t('menu.noDishesTitle')}</h3>
               <p className="font-body-md text-on-surface-variant mt-2">
-                Try searching for something else or clearing the active filters!
+                {t('menu.noDishesDesc')}
               </p>
             </div>
           ) : (
@@ -404,7 +419,10 @@ export default function MenuClient() {
                               item.badge === 'SPECIAL' ? 'bg-[#ffb3af]/30 text-[#891b22]' :
                               'bg-primary text-white'
                             }`}>
-                              {item.badge}
+                              {item.badge === 'POPULAR' ? t('home.popular') : 
+                               item.badge === 'SPECIAL' ? t('badge.special') : 
+                               item.badge === 'SIGNATURE' ? t('badge.signature') : 
+                               t('badge.hot')}
                             </span>
                           )}
                         </div>
