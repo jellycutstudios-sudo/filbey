@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
@@ -24,6 +24,14 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { itemCount } = useCart();
+  const [isFirstOrder, setIsFirstOrder] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const hasOrdered = localStorage.getItem('filbey_has_ordered');
+    setIsFirstOrder(!hasOrdered);
+    setMounted(true);
+  }, []);
 
   return (
     <>
@@ -51,7 +59,12 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
             >
               <span className="material-symbols-outlined text-sm">delivery_dining</span>
               <span className="hidden sm:inline">Order Now</span>
-              {itemCount > 0 && (
+              {mounted && isFirstOrder && (
+                <span className="hidden sm:inline bg-secondary-container text-on-secondary-container text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ml-0.5">
+                  ₹30 OFF
+                </span>
+              )}
+              {mounted && itemCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full flex items-center justify-center">
                   {itemCount}
                 </span>

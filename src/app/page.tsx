@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useLanguage } from '@/context/LanguageContext';
+import { getRestaurantStatus, type OpenStatus } from '@/utils/restaurantHours';
 
 const faqJsonLd = {
   '@context': 'https://schema.org',
@@ -46,26 +47,56 @@ const faqJsonLd = {
   ],
 };
 
+const TICKER_ITEMS_BASE = [
+  { icon: '🎉', text: '1st Order ₹30 OFF — Use on checkout' },
+  { icon: '🚗', text: 'Free Delivery on orders ₹399+' },
+  { icon: '🍗', text: '100% Halal Certified Chicken' },
+  { icon: '⭐', text: 'Loved by 500+ customers in OMR, Chennai' },
+  { icon: '💬', text: 'Quick orders via WhatsApp — +91 81223 56144' },
+];
+
+const PERKS = [
+  { icon: '🎁', title: '₹30 OFF', sub: 'First order' },
+  { icon: '🚗', title: 'Free Delivery', sub: 'On ₹399+' },
+  { icon: '✅', title: '100% Halal', sub: 'Certified' },
+  { icon: '🔥', title: 'Fresh & Hot', sub: 'Made to order' },
+  { icon: '⭐', title: '4.5★ Rating', sub: 'Google Reviews' },
+  { icon: '💬', title: 'WhatsApp', sub: 'Order by chat' },
+];
+
 export default function Home() {
   const heroSectionRef = useRef<HTMLElement>(null);
   const heroBgRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { t } = useLanguage();
+  const [isFirstOrder, setIsFirstOrder] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [restaurantStatus, setRestaurantStatus] = useState<OpenStatus | null>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
+  useEffect(() => {
+    const hasOrdered = localStorage.getItem('filbey_has_ordered');
+    setIsFirstOrder(!hasOrdered);
+    setRestaurantStatus(getRestaurantStatus());
+    setMounted(true);
+    const timer = setInterval(() => setRestaurantStatus(getRestaurantStatus()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const heroSection = heroSectionRef.current;
     const heroBg = heroBgRef.current;
     if (!heroSection || !heroBg) return;
 
+    // Only apply parallax when video hasn't loaded (poster image mode)
     const handleMouseMove = (e: MouseEvent) => {
+      if (videoLoaded) return;
       const { clientX, clientY } = e;
       const { innerWidth, innerHeight } = window;
       const xPos = clientX / innerWidth - 0.5;
       const yPos = clientY / innerHeight - 0.5;
-      const xOffset = xPos * -40;
-      const yOffset = yPos * -40;
-      heroBg.style.transform = `scale(1.1) translate(${xOffset}px, ${yOffset}px)`;
+      heroBg.style.transform = `scale(1.1) translate(${xPos * -40}px, ${yPos * -40}px)`;
     };
-
     const handleMouseLeave = () => {
       heroBg.style.transform = 'scale(1.1) translate(0px, 0px)';
     };
@@ -76,7 +107,14 @@ export default function Home() {
       heroSection.removeEventListener('mousemove', handleMouseMove);
       heroSection.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, []);
+  }, [videoLoaded]);
+
+  // Build ticker items — inject live status as the hours item
+  const hoursTickerItem = mounted && restaurantStatus
+    ? { icon: restaurantStatus.isOpen ? '🟢' : '🔴', text: restaurantStatus.isOpen ? restaurantStatus.label : 'Closed · Opens at 11:30 AM' }
+    : { icon: '⏰', text: 'Open Daily 11:30 AM – 11:30 PM' };
+  const TICKER_ITEMS = [...TICKER_ITEMS_BASE, hoursTickerItem];
+  const tickerItems = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (
     <>
@@ -85,62 +123,174 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <Navbar />
-      <main className="pt-20">
-        {/* Hero Section */}
+
+      {/* ── Offer Ticker Strip ── */}
+      <div className="fixed top-20 left-0 right-0 z-40 bg-primary overflow-hidden h-9 flex items-center">
+        <div className="ticker-track flex items-center">
+          {tickerItems.map((item, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-1.5 text-white text-xs font-semibold px-6 tracking-wide shrink-0"
+            >
+              <span>{item.icon}</span>
+              <span>{item.text}</span>
+              <span className="mx-4 text-white/40 text-base leading-none">•</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <main className="pt-[116px]">
+        {/* ── Hero Section ── */}
         <section
           id="hero-section"
           ref={heroSectionRef}
-          className="relative w-full h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden"
+          className="relative w-full min-h-[88svh] flex items-center justify-center overflow-hidden"
         >
-          {/* Background Image */}
+          {/* ── Poster Image (shows instantly, hidden once video plays) ── */}
           <div
             ref={heroBgRef}
-            className="absolute inset-0 w-full h-full transition-transform duration-300 ease-out scale-110"
+            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out scale-110 ${
+              videoLoaded ? 'opacity-0' : 'opacity-100'
+            }`}
           >
             <Image
-              src="/hero-image.jpeg"
-              alt="Filbey Hero Background"
+              src="/hero-video-poster.jpg"
+              alt="Filbey Hero"
               fill
               priority
               sizes="100vw"
               className="object-cover"
             />
           </div>
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/40" />
-          {/* Content */}
-          <div className="relative z-10 text-center px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto flex flex-col items-center gap-stack-lg">
-            <h1 className="font-display text-display text-white text-shadow-hero uppercase leading-tight md:text-7xl text-5xl">
+
+          {/* ── Hero Video (lazy-loaded, fades in when ready) ── */}
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="none"
+            poster="/hero-video-poster.jpg"
+            onCanPlayThrough={() => setVideoLoaded(true)}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
+              videoLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <source src="/hero-video.webm" type="video/webm" />
+            <source src="/hero-video.mp4" type="video/mp4" />
+          </video>
+
+          {/* Dark Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/70" />
+
+          {/* Hero Content */}
+          <div className="relative z-10 text-center px-4 md:px-8 max-w-3xl mx-auto flex flex-col items-center gap-5 py-16">
+
+            {/* Social Proof chip + Live Open Status */}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/25 text-white/90 text-xs font-semibold px-4 py-1.5 rounded-full">
+                <span>⭐⭐⭐⭐⭐</span>
+                <span>Loved by 500+ customers in OMR, Chennai</span>
+              </div>
+              {mounted && restaurantStatus && (
+                <div className={`flex items-center gap-1.5 backdrop-blur-sm border text-xs font-bold px-3 py-1.5 rounded-full ${
+                  restaurantStatus.isOpen
+                    ? 'bg-green-500/20 border-green-400/40 text-green-300'
+                    : 'bg-red-500/20 border-red-400/40 text-red-300'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${restaurantStatus.isOpen ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+                  {restaurantStatus.label}
+                </div>
+              )}
+            </div>
+
+            {/* Headline */}
+            <h1 className="font-display text-white text-shadow-hero uppercase leading-tight text-5xl md:text-7xl">
               {t('home.heroTitle1')}<br />
               <span className="text-secondary-fixed-dim">{t('home.heroTitle2')}</span>
             </h1>
-            <div className="flex flex-col sm:flex-row gap-stack-md mt-stack-md">
+
+            {/* First-order offer badge */}
+            {mounted && isFirstOrder && (
+              <div className="offer-badge-pulse flex items-center gap-2.5 bg-secondary-container text-on-secondary-container font-bold text-sm md:text-base px-5 py-2.5 rounded-full shadow-lg border-2 border-secondary-fixed-dim/60">
+                <span className="text-xl">🎁</span>
+                <span>First Order? Get <strong>₹30 OFF</strong> — Applied at checkout</span>
+              </div>
+            )}
+
+            {/* Free delivery nudge */}
+            <p className="text-white/80 text-sm md:text-base font-medium">
+              🚗 Free delivery on orders <strong className="text-secondary-fixed-dim">₹399+</strong> &nbsp;·&nbsp; 🍗 100% Halal
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full sm:w-auto">
+              <Link
+                href="/order"
+                id="hero-order-now-btn"
+                className="bg-primary text-white font-label-lg text-base py-4 px-8 rounded-full shadow-[0_4px_24px_rgba(93,0,12,0.5)] hover:bg-primary-container hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>delivery_dining</span>
+                Order Now{mounted && isFirstOrder ? ' — ₹30 Off' : ''}
+              </Link>
               <Link
                 href="/menu"
-                className="bg-primary text-on-primary font-label-lg text-label-lg py-4 px-8 rounded-full shadow-[0_4px_16px_rgba(93,0,12,0.4)] hover:bg-primary-container hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                id="hero-view-menu-btn"
+                className="bg-transparent border-2 border-white/60 text-white bg-black/20 backdrop-blur-sm font-label-lg text-base py-4 px-8 rounded-full hover:bg-white hover:text-primary hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
               >
                 {t('nav.dineInMenu')} <span className="material-symbols-outlined">restaurant_menu</span>
               </Link>
-              <Link
-                href="https://maps.app.goo.gl/w5SU8wuf79VM7HtW9?g_st=iw"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-transparent border-2 border-secondary-container text-secondary-container bg-black/20 backdrop-blur-sm font-label-lg text-label-lg py-4 px-8 rounded-full hover:bg-secondary-container hover:text-on-secondary-container hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                {t('home.findUs')} <span className="material-symbols-outlined">location_on</span>
-              </Link>
+            </div>
+
+            {/* Trust row */}
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-white/70 text-xs mt-1">
+              <span className="flex items-center gap-1"><span className="text-secondary-fixed-dim">✓</span> No app download</span>
+              <span className="flex items-center gap-1"><span className="text-secondary-fixed-dim">✓</span> Order via WhatsApp</span>
+              <span className="flex items-center gap-1"><span className="text-secondary-fixed-dim">✓</span> Pay on delivery</span>
             </div>
           </div>
         </section>
 
-        {/* About Us Teaser Section */}
+        {/* ── Perks Horizontal Strip ── */}
+        <section className="bg-surface-container-low py-5 px-4 md:px-8 overflow-hidden">
+          {/* Mobile: horizontal scroll */}
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 md:hidden">
+            {PERKS.map((perk) => (
+              <div
+                key={perk.title}
+                className="perk-chip flex-shrink-0 flex flex-col items-center gap-1 bg-surface rounded-2xl px-4 py-3 shadow-sm border border-surface-container-high min-w-[84px]"
+              >
+                <span className="text-2xl leading-none">{perk.icon}</span>
+                <span className="font-bold text-primary text-xs text-center leading-tight">{perk.title}</span>
+                <span className="text-on-surface-variant text-[10px] text-center leading-tight">{perk.sub}</span>
+              </div>
+            ))}
+          </div>
+          {/* Desktop: grid */}
+          <div className="hidden md:grid grid-cols-6 gap-4 max-w-container-max mx-auto">
+            {PERKS.map((perk) => (
+              <div
+                key={perk.title}
+                className="perk-chip flex flex-col items-center gap-1.5 bg-surface rounded-2xl px-3 py-4 shadow-sm border border-surface-container-high text-center"
+              >
+                <span className="text-3xl leading-none">{perk.icon}</span>
+                <span className="font-bold text-primary text-sm leading-tight">{perk.title}</span>
+                <span className="text-on-surface-variant text-xs leading-tight">{perk.sub}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── About Us Teaser Section ── */}
         <section className="py-margin-desktop bg-surface px-margin-mobile md:px-margin-desktop overflow-hidden">
           <div className="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
             {/* Image Side */}
-            <div className="lg:col-span-5 relative h-[350px] md:h-[450px] rounded-[24px] overflow-hidden menu-card-shadow">
+            <div className="lg:col-span-5 relative h-[300px] md:h-[420px] rounded-[24px] overflow-hidden menu-card-shadow">
               <Image
                 src="/Classic Burgers.png"
-                alt="Filbey Fried Chicken &amp; Burgers Chennai Food Showcase"
+                alt="Filbey Fried Chicken & Burgers Chennai Food Showcase"
                 fill
                 sizes="(max-width: 1024px) 100vw, 41vw"
                 className="object-cover"
@@ -173,7 +323,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Highlights */}
+        {/* ── Highlights ── */}
         <section className="py-margin-desktop bg-surface-container-low px-margin-mobile md:px-margin-desktop">
           <div className="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-3 gap-gutter">
             {[
@@ -192,7 +342,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Menu Explorer */}
+        {/* ── Menu Explorer ── */}
         <section className="py-margin-desktop bg-background px-margin-mobile md:px-margin-desktop" id="menu">
           <div className="max-w-container-max mx-auto">
             <div className="flex flex-col items-center text-center mb-stack-lg">
@@ -203,55 +353,80 @@ export default function Home() {
             {/* Bento Grid */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-margin-desktop">
               {/* Signature Chicken - large */}
-              <Link href="/menu#fried-chicken" className="md:col-span-8 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
+              <Link href="/menu#fried-chicken" className="md:col-span-8 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-video md:aspect-auto md:min-h-[300px] block">
                 <Image src="/Signature Chicken.png" alt="Filbey Signature Fried Chicken Bucket Meal" fill sizes="(max-width: 768px) 100vw, 66vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full flex justify-between items-end">
+                <div className="absolute bottom-0 left-0 p-5 md:p-8 w-full flex justify-between items-end">
                   <div>
                     <span className="bg-primary text-white font-label-sm text-label-sm px-3 py-1 rounded-full mb-2 inline-block">{t('home.popular')}</span>
-                    <h3 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white uppercase">{t('home.signatureChicken')}</h3>
-                    <p className="font-body-md text-body-md text-surface-bright mt-1">2 Pc • 4 Pc • 8 Pc</p>
+                    <h3 className="font-headline-lg text-2xl md:text-headline-lg text-white uppercase">{t('home.signatureChicken')}</h3>
+                    <p className="font-body-md text-sm text-surface-bright mt-1">2 Pc • 4 Pc • 8 Pc</p>
                   </div>
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary group-hover:bg-secondary group-hover:text-white transition-colors">
-                    <span className="material-symbols-outlined">arrow_forward</span>
+                  <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center text-primary group-hover:bg-secondary group-hover:text-white transition-colors">
+                    <span className="material-symbols-outlined text-sm md:text-base">arrow_forward</span>
                   </div>
                 </div>
               </Link>
 
               {/* Classic Burgers */}
-              <Link href="/menu#burgers" className="md:col-span-4 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
+              <Link href="/menu#burgers" className="md:col-span-4 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-video md:aspect-auto md:min-h-[300px] block">
                 <Image src="/Classic Burgers.png" alt="Filbey Classic Dynamite Burger Meal" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-6 w-full">
-                  <h3 className="font-headline-md text-headline-md text-white uppercase">{t('home.classicBurgers')}</h3>
-                  <p className="text-sm text-surface-bright mt-1">{t('home.classicBurgersDesc')}</p>
+                <div className="absolute bottom-0 left-0 p-5 md:p-6 w-full flex justify-between items-end">
+                  <div>
+                    <h3 className="font-headline-md text-xl md:text-headline-md text-white uppercase">{t('home.classicBurgers')}</h3>
+                    <p className="text-xs md:text-sm text-surface-bright mt-1">{t('home.classicBurgersDesc')}</p>
+                  </div>
+                  <div className="shrink-0 w-9 h-9 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white group-hover:bg-white group-hover:text-primary transition-colors">
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </div>
                 </div>
               </Link>
 
               {/* Signature Shakes */}
-              <Link href="/menu#drinks-desserts" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
+              <Link href="/menu#drinks-desserts" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-video md:aspect-auto md:min-h-[300px] block">
                 <Image src="/Signature Shakes.png" alt="Filbey Signature Lotus Biscoff Milkshake" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-6 w-full">
-                  <h3 className="font-headline-md text-headline-md text-white uppercase">{t('home.signatureShakes')}</h3>
-                  <p className="text-sm text-surface-bright mt-1">{t('home.signatureShakesDesc')}</p>
+                <div className="absolute bottom-0 left-0 p-5 md:p-6 w-full flex justify-between items-end">
+                  <div>
+                    <h3 className="font-headline-md text-xl md:text-headline-md text-white uppercase">{t('home.signatureShakes')}</h3>
+                    <p className="text-xs md:text-sm text-surface-bright mt-1">{t('home.signatureShakesDesc')}</p>
+                  </div>
+                  <div className="shrink-0 w-9 h-9 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white group-hover:bg-white group-hover:text-primary transition-colors">
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </div>
                 </div>
               </Link>
 
               {/* Wraps & Sides */}
-              <Link href="/menu#wraps-sides" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
+              <Link href="/menu#wraps-sides" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-video md:aspect-auto md:min-h-[300px] block">
                 <Image src="/Wraps & Sides.png" alt="Filbey Crispy Chicken Wraps and Loaded Fries Sides" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-6 w-full">
-                  <h3 className="font-headline-md text-headline-md text-white uppercase">{t('home.wrapsSidesTitle')}</h3>
-                  <p className="text-sm text-surface-bright mt-1">{t('home.wrapsSidesDesc')}</p>
+                <div className="absolute bottom-0 left-0 p-5 md:p-6 w-full flex justify-between items-end">
+                  <div>
+                    <h3 className="font-headline-md text-xl md:text-headline-md text-white uppercase">{t('home.wrapsSidesTitle')}</h3>
+                    <p className="text-xs md:text-sm text-surface-bright mt-1">{t('home.wrapsSidesDesc')}</p>
+                  </div>
+                  <div className="shrink-0 w-9 h-9 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white group-hover:bg-white group-hover:text-primary transition-colors">
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </div>
                 </div>
+              </Link>
+            </div>
+
+            {/* Browse Full Menu CTA */}
+            <div className="flex justify-center">
+              <Link
+                href="/menu"
+                className="flex items-center gap-2 border-2 border-primary text-primary font-label-lg text-sm md:text-base py-3.5 px-8 rounded-full hover:bg-primary hover:text-white hover:scale-105 transition-all duration-300"
+              >
+                Browse Full Menu <span className="material-symbols-outlined">restaurant_menu</span>
               </Link>
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
+        {/* ── FAQ Section ── */}
         <section className="py-margin-desktop bg-surface px-margin-mobile md:px-margin-desktop" id="faq">
           <div className="max-w-container-max mx-auto">
             <div className="flex flex-col items-center text-center mb-stack-lg">
@@ -266,16 +441,75 @@ export default function Home() {
                 { qKey: 'home.faqQ3', aKey: 'home.faqA3' },
                 { qKey: 'home.faqQ4', aKey: 'home.faqA4' },
               ].map((faq) => (
-                <div key={faq.qKey} className="bg-white rounded-xl p-6 menu-card-shadow">
-                  <h3 className="font-headline-md text-xl text-on-surface mb-2">{t(faq.qKey)}</h3>
+                <div key={faq.qKey} className="bg-white rounded-xl p-5 md:p-6 menu-card-shadow">
+                  <h3 className="font-headline-md text-lg md:text-xl text-on-surface mb-2">{t(faq.qKey)}</h3>
                   <p className="font-body-md text-on-surface-variant">{t(faq.aKey)}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
+
+        {/* ── WhatsApp Order CTA Block ── */}
+        <section className="py-margin-desktop bg-surface-container-low px-margin-mobile md:px-margin-desktop">
+          <div className="max-w-2xl mx-auto">
+            <div className="relative bg-gradient-to-br from-[#075E54] to-[#128C7E] rounded-3xl overflow-hidden p-7 md:p-10 flex flex-col md:flex-row items-center gap-6 shadow-[0_8px_32px_rgba(7,94,84,0.25)]">
+              {/* Background decoration */}
+              <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5" />
+              <div className="absolute -right-4 bottom-4 w-20 h-20 rounded-full bg-white/5" />
+
+              {/* WhatsApp icon */}
+              <div className="relative shrink-0 w-16 h-16 md:w-20 md:h-20 bg-white/15 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="white" viewBox="0 0 16 16">
+                  <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232" />
+                </svg>
+              </div>
+
+              {/* Text */}
+              <div className="text-center md:text-left flex-1 relative z-10">
+                <h3 className="text-white font-display text-2xl md:text-3xl uppercase leading-tight mb-1">
+                  Prefer to order by chat?
+                </h3>
+                <p className="text-white/80 text-sm md:text-base mb-4">
+                  Place your order directly on WhatsApp — quick, easy, and personal. We'll confirm your order in minutes.
+                </p>
+                <Link
+                  href="https://wa.me/918122356144"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  id="whatsapp-order-cta"
+                  className="inline-flex items-center gap-2 bg-white text-[#075E54] font-bold text-sm md:text-base py-3 px-7 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300"
+                >
+                  Chat on WhatsApp
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+
       <Footer />
+
+      {/* ── Sticky Mobile Bottom Bar ── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-t border-surface-container-high px-4 py-3 flex items-center gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)]">
+        <Link
+          href="tel:+918122356144"
+          id="mobile-sticky-call-btn"
+          className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-primary/20 bg-primary/5 text-primary shrink-0 hover:bg-primary/10 transition-colors"
+          aria-label="Call us"
+        >
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>call</span>
+        </Link>
+        <Link
+          href="/order"
+          id="mobile-sticky-order-btn"
+          className="flex-1 flex items-center justify-center gap-2 bg-primary text-white font-bold text-base py-3 rounded-full shadow-[0_4px_16px_rgba(93,0,12,0.4)] hover:bg-primary-container transition-all duration-300 active:scale-95"
+        >
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>delivery_dining</span>
+          Order Now{mounted && isFirstOrder ? ' — ₹30 Off' : ''}
+        </Link>
+      </div>
     </>
   );
 }

@@ -1,12 +1,13 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { DeliveryInfo } from '@/context/CartContext';
 import LocationCheck from './LocationCheck';
 import OrderMenuClient from './OrderMenuClient';
 import CustomerDetailsForm from './CustomerDetailsForm';
 import OrderConfirmation from './OrderConfirmation';
+import { getRestaurantStatus, type OpenStatus } from '@/utils/restaurantHours';
 
 interface CustomerDetails {
   name: string;
@@ -60,6 +61,13 @@ export default function OrderStepper() {
   const [step, setStep] = useState<Step>('location');
   const [customer, setCustomer] = useState<CustomerDetails | null>(null);
   const { setDeliveryInfo } = useCart();
+  const [restaurantStatus, setRestaurantStatus] = useState<OpenStatus | null>(null);
+
+  useEffect(() => {
+    setRestaurantStatus(getRestaurantStatus());
+    const timer = setInterval(() => setRestaurantStatus(getRestaurantStatus()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleLocationConfirm = (info: DeliveryInfo) => {
     setDeliveryInfo(info);
@@ -159,6 +167,32 @@ export default function OrderStepper() {
 
   return (
     <div>
+      {/* ── Closed Hours Banner ── */}
+      {restaurantStatus && !restaurantStatus.isOpen && (
+        <div className="mx-4 mt-4 mb-2 bg-amber-50 border border-amber-300 rounded-2xl px-4 py-3.5 flex items-start gap-3">
+          <span className="text-2xl shrink-0 mt-0.5">🔴</span>
+          <div>
+            <p className="font-bold text-amber-800 text-sm">We're currently closed</p>
+            <p className="text-amber-700 text-xs mt-0.5 leading-relaxed">
+              Filbey is open <strong>11:30 AM – 11:30 PM</strong> every day. You can still browse the menu and place your order — we'll prepare it as soon as we open!
+            </p>
+            <p className="text-amber-600 text-xs mt-1.5 font-semibold">
+              ⏰ Opens in ~{Math.round(restaurantStatus.minutesUntilChange / 60)} hr{restaurantStatus.minutesUntilChange > 90 ? 's' : ''}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Open Banner (closing soon) ── */}
+      {restaurantStatus?.isOpen && restaurantStatus.minutesUntilChange <= 60 && (
+        <div className="mx-4 mt-4 mb-2 bg-orange-50 border border-orange-300 rounded-2xl px-4 py-3 flex items-center gap-3">
+          <span className="text-xl shrink-0">⏰</span>
+          <p className="text-orange-800 text-xs font-semibold">
+            We're closing in {restaurantStatus.minutesUntilChange} minutes — order now to avoid missing out!
+          </p>
+        </div>
+      )}
+
       {/* Step progress indicator */}
       <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-md border-b border-surface-variant/15 shadow-sm">
         <StepIndicator current={step} />
