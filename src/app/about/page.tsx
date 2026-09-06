@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     title: 'About Us - Filbey Fried Chicken & Burgers',
     description:
       'Discover the story of Filbey Chennai. Home to the best crispy fried chicken and handcrafted burgers in the city, made fresh daily with 100% Halal certified ingredients.',
-    images: [{ url: '/Document.png' }],
+    images: [{ url: '/filbey-storefront.jpg' }],
   },
 };
 

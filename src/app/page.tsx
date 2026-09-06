@@ -298,13 +298,13 @@ export default function Home() {
             {/* Image Side */}
             <div className="lg:col-span-5 relative h-[300px] md:h-[420px] rounded-[24px] overflow-hidden menu-card-shadow">
               <Image
-                src="/Classic Burgers.png"
-                alt="Filbey Fried Chicken & Burgers Chennai Food Showcase"
+                src="/filbey-storefront.jpg"
+                alt="Filbey Fried Chicken & Burgers Perungudi Storefront"
                 fill
                 sizes="(max-width: 1024px) 100vw, 41vw"
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </div>
 
             {/* Text Side */}

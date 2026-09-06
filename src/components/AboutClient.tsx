@@ -28,13 +28,13 @@ export default function AboutClient() {
           {/* Story Image Panel */}
           <div className="lg:col-span-6 relative h-[350px] md:h-[500px] rounded-[24px] overflow-hidden menu-card-shadow">
             <Image
-              src="/Document.png"
-              alt="Filbey Fried Chicken &amp; Burgers Restaurant Experience"
+              src="/filbey-storefront.jpg"
+              alt="Filbey Fried Chicken & Burgers Perungudi Storefront"
               fill
               className="object-cover"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6 text-white">
               <p className="font-display text-2xl uppercase tracking-wider text-secondary-container">
                 {t('about.sideQuoteTag')}
