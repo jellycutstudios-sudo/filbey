@@ -298,7 +298,7 @@ export default function Home() {
             {/* Image Side */}
             <div className="lg:col-span-6 relative aspect-[4/3] w-full rounded-[24px] overflow-hidden menu-card-shadow shadow-md">
               <Image
-                src="/filbey-storefront.jpg"
+                src="/about-filbey-storefront.jpg"
                 alt="Filbey Fried Chicken & Burgers Perungudi Storefront"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"

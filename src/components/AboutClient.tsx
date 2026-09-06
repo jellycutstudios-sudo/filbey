@@ -29,7 +29,7 @@ export default function AboutClient() {
           <div className="lg:col-span-6 flex flex-col gap-2">
             <div className="relative aspect-[4/3] w-full rounded-[24px] overflow-hidden menu-card-shadow shadow-lg">
               <Image
-                src="/filbey-storefront.jpg"
+                src="/about-filbey-storefront.jpg"
                 alt="Filbey Fried Chicken & Burgers Perungudi Storefront"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
