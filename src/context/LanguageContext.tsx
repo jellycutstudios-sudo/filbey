@@ -195,7 +195,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'about.heroTag': 'Who We Are',
     'about.heroTitle': 'The Story Behind the Crunch',
     'about.heroDesc': 'From day one, our mission has been simple: serve the best-tasting, highest-quality, and most satisfying crispy fried chicken and burgers in Chennai.',
-    'about.sideQuoteTag': "Feelin' Chilli? It's Filbey!",
+    'about.sideQuoteTag': 'A Little Crunch. A Lot of Comfort!',
     'about.sideQuoteDesc': 'Crafting happiness in every crunchy bite.',
     'about.storyTitle': 'Best In The City. Loved By Everyone.',
     'about.storyDesc1': "At Filbey, we don't believe in taking shortcuts. Our signature golden-brown, crispy chicken and succulent burgers are the result of premium culinary crafting, fresh high-grade ingredients, and a genuine passion for great food.",
@@ -229,7 +229,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'badge.hot': 'Hot',
 
     // Footer
-    'footer.tagline': '“Feelin’ Chilli? It’s Filbey!”',
+    'footer.tagline': '“A Little Crunch. A Lot of Comfort!”',
     'footer.openingHours': 'Opening Hours',
     'footer.monSun': 'Mon - Sun: 11:30 AM - 11:30 PM',
     'footer.copyright': '© 2026 Filbey Fried Chicken & Burgers Chennai. All Rights Reserved.',
@@ -323,7 +323,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'badge.hot': 'காரமானது',
 
     // Footer
-    'footer.tagline': '“சில்லி சுவை வேண்டுமா? அது ஃபில்பே தான்!”',
+    'footer.tagline': '“கொஞ்சம் மொறுமொறுப்பு. நிறைய திருப்தி!”',
     'footer.openingHours': 'திறந்திருக்கும் நேரங்கள்',
     'footer.monSun': 'திங்கள் - ஞாயிறு: காலை 11:30 - இரவு 11:30',
     'footer.copyright': '© 2026 ஃபில்பே ஃபிரைடு சிக்கன் & பர்கர்ஸ் சென்னை. அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.',

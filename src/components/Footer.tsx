@@ -19,7 +19,7 @@ export default function Footer() {
             height={56}
             className="h-14 w-auto self-start"
           />
-          <p className="text-surface-bright font-body-md text-body-md italic mt-2 opacity-70">
+          <p className="text-secondary-fixed font-display text-lg tracking-wide mt-2 font-semibold">
             {t('footer.tagline')}
           </p>
           <Link
