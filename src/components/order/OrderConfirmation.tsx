@@ -1,13 +1,7 @@
 'use client';
 
 import { useCart } from '@/context/CartContext';
-
-interface CustomerDetails {
-  name: string;
-  phone: string;
-  address: string;
-  notes: string;
-}
+import { CustomerDetails } from './CustomerDetailsForm';
 
 interface OrderConfirmationProps {
   customer: CustomerDetails;
@@ -36,16 +30,21 @@ function buildWhatsAppMessage(
   const deliveryStr = isFreeDelivery ? `FREE (Order above ₹499 🎉)` : `₹${effectiveDeliveryFee}`;
   const discountStr = discount > 0 ? `\n🎁 *First Direct Order Discount:* -₹${discount}` : '';
 
+  const mapsLink = customer.mapsUrl
+    ? customer.mapsUrl
+    : `https://maps.google.com/?q=${encodeURIComponent(customer.address + (customer.address.toLowerCase().includes('chennai') ? '' : ', Chennai'))}`;
+
   return (
     `🍗 *New Order — Filbey Direct Delivery*\n\n` +
     `📦 *Items:*\n${itemLines}\n\n` +
     `💰 *Subtotal:* ₹${subtotal}` +
     discountStr + `\n` +
     `🚗 *Delivery:* ${deliveryStr}\n` +
-    `🧾 *GST (5%):* ₹${gstAmount}\n` +
+    `🧾 *GST on Food (5%):* ₹${gstAmount}\n` +
     `✅ *Total to Pay:* ₹${total}\n\n` +
     `📍 *Delivery Address:*\n${customer.address}\n` +
-    `🗺️ *Area:* ${locationName}\n\n` +
+    `🗺️ *Google Maps Pin:* ${mapsLink}\n` +
+    `🏙️ *Area:* ${locationName}\n\n` +
     `👤 *Name:* ${customer.name}\n` +
     `📞 *Phone:* +91 ${customer.phone}\n` +
     (customer.notes ? `📝 *Notes:* ${customer.notes}\n` : '') +
@@ -152,7 +151,7 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
           <div className="flex justify-between text-sm text-on-surface-variant">
             <span className="flex items-center gap-1">
               GST
-              <span className="text-[10px] bg-surface-container px-1.5 py-0.5 rounded-full">(5% CGST+SGST)</span>
+              <span className="text-[10px] bg-surface-container px-1.5 py-0.5 rounded-full text-on-surface-variant/70">5% on food</span>
             </span>
             <span className="font-semibold text-on-surface">₹{gstAmount}</span>
           </div>
@@ -184,7 +183,20 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
           </div>
           <div className="flex gap-3">
             <span className="material-symbols-outlined text-on-surface-variant text-base flex-shrink-0 mt-0.5">location_on</span>
-            <span className="text-on-surface">{customer.address}</span>
+            <div className="flex-1">
+              <span className="text-on-surface">{customer.address}</span>
+              <div className="mt-1">
+                <a
+                  href={customer.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(customer.address + (customer.address.toLowerCase().includes('chennai') ? '' : ', Chennai'))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-emerald-700 font-semibold hover:underline bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"
+                >
+                  <span className="material-symbols-outlined text-xs">place</span>
+                  Google Maps Pin Attached for Rider ↗
+                </a>
+              </div>
+            </div>
           </div>
           {customer.notes && (
             <div className="flex gap-3">

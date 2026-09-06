@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 
-interface CustomerDetails {
+export interface CustomerDetails {
   name: string;
   phone: string;
   address: string;
   notes: string;
+  mapsUrl?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface CustomerDetailsFormProps {
@@ -52,46 +55,71 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
+      // If user typed address without GPS, provide default maps search link
+      const submissionData = {
+        ...form,
+        mapsUrl: form.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(form.address + (form.address.toLowerCase().includes('chennai') ? '' : ', Chennai'))}`,
+      };
       try {
-        localStorage.setItem('filbey_customer', JSON.stringify(form));
+        localStorage.setItem('filbey_customer', JSON.stringify(submissionData));
       } catch { /* ignore */ }
-      onSubmit(form);
+      onSubmit(submissionData);
     }
   };
 
   const handleGPS = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      alert('Location services are not supported on this browser.');
+      return;
+    }
     setGpsLoading(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
         try {
           // Reverse geocode using free Nominatim API
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`,
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
             { headers: { 'Accept-Language': 'en' } }
           );
           const data = await res.json();
           const parts = [
             data.address?.road,
             data.address?.suburb,
+            data.address?.neighbourhood,
             data.address?.city_district,
             data.address?.city,
             data.address?.postcode,
           ].filter(Boolean);
-          setForm(prev => ({ ...prev, address: parts.join(', ') }));
+          const detectedAddress = parts.join(', ');
+          setForm(prev => ({
+            ...prev,
+            address: detectedAddress || `Location Pin: ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+            mapsUrl,
+            latitude: lat,
+            longitude: lng,
+          }));
           setErrors(prev => ({ ...prev, address: '' }));
         } catch {
           // Fallback to raw coords
           setForm(prev => ({
             ...prev,
-            address: `Lat: ${pos.coords.latitude.toFixed(5)}, Lng: ${pos.coords.longitude.toFixed(5)}`,
+            address: `GPS Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+            mapsUrl,
+            latitude: lat,
+            longitude: lng,
           }));
         } finally {
           setGpsLoading(false);
         }
       },
-      () => setGpsLoading(false),
-      { timeout: 10000 }
+      (err) => {
+        console.warn('Geolocation error:', err);
+        setGpsLoading(false);
+      },
+      { timeout: 12000, enableHighAccuracy: true }
     );
   };
 
@@ -169,7 +197,7 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
         </div>
 
         {/* Address */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <label htmlFor="customer-address" className="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-wider text-xs">
               Delivery Address *
@@ -178,22 +206,40 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
               type="button"
               onClick={handleGPS}
               disabled={gpsLoading}
-              className="flex items-center gap-1 text-xs text-primary font-semibold hover:underline disabled:opacity-50 transition-opacity"
+              className="flex items-center gap-1 text-xs text-primary font-bold hover:opacity-90 disabled:opacity-50 transition-opacity bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20"
             >
-              <span className="material-symbols-outlined text-sm">{gpsLoading ? 'sync' : 'my_location'}</span>
-              {gpsLoading ? 'Fetching…' : 'Use my location'}
+              <span className={`material-symbols-outlined text-sm ${gpsLoading ? 'animate-spin' : ''}`}>
+                {gpsLoading ? 'sync' : 'my_location'}
+              </span>
+              {gpsLoading ? 'Detecting GPS…' : 'Use Current Location (GPS)'}
             </button>
           </div>
           <textarea
             id="customer-address"
             value={form.address}
             onChange={set('address')}
-            placeholder="Door No., Street, Area, Landmark, Pincode"
+            placeholder="Door No., Building, Street, Area, Landmark, Pincode"
             rows={3}
             className={`w-full px-4 py-3.5 bg-white rounded-xl border text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-sm resize-none ${
               errors.address ? 'border-error ring-1 ring-error/30' : 'border-surface-variant/40'
             }`}
           />
+          {form.mapsUrl && (
+            <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800">
+              <span className="flex items-center gap-1.5 font-medium">
+                <span className="material-symbols-outlined text-sm text-emerald-600">place</span>
+                Exact GPS Pin captured for delivery rider!
+              </span>
+              <a
+                href={form.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-700 underline font-semibold flex items-center gap-0.5 hover:text-emerald-900"
+              >
+                Test Pin ↗
+              </a>
+            </div>
+          )}
           {errors.address && <p className="text-xs text-error ml-1">{errors.address}</p>}
         </div>
 

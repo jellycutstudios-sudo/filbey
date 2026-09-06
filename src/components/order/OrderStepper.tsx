@@ -5,16 +5,9 @@ import { useCart } from '@/context/CartContext';
 import { DeliveryInfo } from '@/context/CartContext';
 import LocationCheck from './LocationCheck';
 import OrderMenuClient from './OrderMenuClient';
-import CustomerDetailsForm from './CustomerDetailsForm';
+import CustomerDetailsForm, { CustomerDetails } from './CustomerDetailsForm';
 import OrderConfirmation from './OrderConfirmation';
 import { getRestaurantStatus, type OpenStatus } from '@/utils/restaurantHours';
-
-interface CustomerDetails {
-  name: string;
-  phone: string;
-  address: string;
-  notes: string;
-}
 
 type Step = 'location' | 'menu' | 'details' | 'confirm' | 'success';
 

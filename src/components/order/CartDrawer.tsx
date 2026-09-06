@@ -202,7 +202,7 @@ export default function CartDrawer({ open, onClose, onProceed, meetsMinOrder, mi
               <div className="flex justify-between text-sm text-on-surface-variant">
                 <span className="flex items-center gap-1">
                   GST
-                  <span className="text-[10px] bg-surface-container px-1.5 py-0.5 rounded-full text-on-surface-variant/70">5% CGST+SGST</span>
+                  <span className="text-[10px] bg-surface-container px-1.5 py-0.5 rounded-full text-on-surface-variant/70">5% on food</span>
                 </span>
                 <span className="font-semibold text-on-surface">₹{gstAmount}</span>
               </div>
