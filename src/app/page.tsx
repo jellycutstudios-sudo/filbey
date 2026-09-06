@@ -186,69 +186,83 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/70" />
 
           {/* Hero Content */}
-          <div className="relative z-10 text-center px-4 md:px-8 max-w-3xl mx-auto flex flex-col items-center gap-5 py-16">
+          <div className="relative z-10 text-center px-4 md:px-8 max-w-3xl mx-auto flex flex-col items-center gap-4 py-12 md:py-16">
 
-            {/* Social Proof chip + Live Open Status */}
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/25 text-white/90 text-xs font-semibold px-4 py-1.5 rounded-full">
-                <span>⭐⭐⭐⭐⭐</span>
-                <span>Loved by 500+ customers in OMR, Chennai</span>
-              </div>
+            {/* Consolidated Premium Status & Rating Pill */}
+            <div className="inline-flex items-center gap-2.5 bg-black/40 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full text-xs text-white shadow-sm">
               {mounted && restaurantStatus && (
-                <div className={`flex items-center gap-1.5 backdrop-blur-sm border text-xs font-bold px-3 py-1.5 rounded-full ${
-                  restaurantStatus.isOpen
-                    ? 'bg-green-500/20 border-green-400/40 text-green-300'
-                    : 'bg-red-500/20 border-red-400/40 text-red-300'
-                }`}>
-                  <span className={`w-2 h-2 rounded-full ${restaurantStatus.isOpen ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
-                  {restaurantStatus.label}
-                </div>
+                <span className="flex items-center gap-1.5 font-semibold">
+                  <span className={`w-2 h-2 rounded-full ${restaurantStatus.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                  <span className={restaurantStatus.isOpen ? 'text-emerald-300' : 'text-rose-300'}>
+                    {restaurantStatus.label}
+                  </span>
+                </span>
               )}
+              <span className="text-white/30">•</span>
+              <span className="flex items-center gap-1 font-medium text-amber-300">
+                <span>★ 4.9</span>
+                <span className="text-white/80 font-normal">Perungudi, Chennai</span>
+              </span>
             </div>
 
-            {/* Headline */}
-            <h1 className="font-display font-extrabold tracking-tight text-white text-shadow-hero uppercase leading-tight text-5xl md:text-7xl">
+            {/* Headline - Clean 2 lines on mobile & desktop */}
+            <h1 className="font-display font-extrabold tracking-tight text-white text-shadow-hero uppercase leading-[1.08] text-3xl sm:text-5xl md:text-7xl max-w-2xl mx-auto">
               {t('home.heroTitle1')}<br />
               <span className="text-secondary-fixed-dim">{t('home.heroTitle2')}</span>
             </h1>
 
-            {/* First-order offer badge */}
-            {mounted && isFirstOrder && (
-              <div className="offer-badge-pulse flex items-center gap-2.5 bg-secondary-container text-on-secondary-container font-bold text-sm md:text-base px-5 py-2.5 rounded-full shadow-lg border-2 border-secondary-fixed-dim/60">
-                <span className="text-xl">🎁</span>
-                <span>First Order? Get <strong>₹30 OFF</strong> — Applied at checkout</span>
-              </div>
-            )}
-
-            {/* Free delivery nudge */}
-            <p className="text-white/80 text-sm md:text-base font-medium">
-              🚗 Free delivery on orders <strong className="text-secondary-fixed-dim">₹399+</strong> &nbsp;·&nbsp; 🍗 100% Halal
-            </p>
+            {/* Appetizing Subtitle & Direct Order Offer */}
+            <div className="flex flex-col items-center gap-2 max-w-md mx-auto">
+              <p className="text-white/90 text-sm md:text-base font-normal tracking-wide">
+                Signature Fried Chicken, Dynamite Burgers &amp; Thick Shakes
+              </p>
+              {mounted && isFirstOrder ? (
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 via-primary-container/40 to-amber-500/20 backdrop-blur-md border border-amber-300/40 text-amber-100 text-xs sm:text-sm px-4 py-1.5 rounded-full font-semibold shadow-sm">
+                  <span>🎁 ₹30 OFF First Direct Order</span>
+                  <span className="text-white/30">•</span>
+                  <span>Free Delivery ₹499+</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs sm:text-sm px-4 py-1.5 rounded-full font-medium shadow-sm">
+                  <span>🚗 Free Delivery on orders ₹499+</span>
+                </div>
+              )}
+            </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-1 w-full max-w-sm sm:max-w-none">
               <Link
                 href="/order"
                 id="hero-order-now-btn"
-                className="bg-primary text-white font-label-lg text-base py-4 px-8 rounded-full shadow-[0_4px_24px_rgba(93,0,12,0.5)] hover:bg-primary-container hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto bg-primary hover:bg-primary-container text-white font-label-lg text-base py-3.5 px-8 rounded-full shadow-[0_6px_25px_rgba(93,0,12,0.5)] hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
               >
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>delivery_dining</span>
-                Order Now{mounted && isFirstOrder ? ' — ₹30 Off' : ''}
+                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>moped</span>
+                <span>Order Online</span>
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-bold ml-1">Direct Delivery</span>
               </Link>
               <Link
                 href="/menu"
                 id="hero-view-menu-btn"
-                className="bg-transparent border-2 border-white/60 text-white bg-black/20 backdrop-blur-sm font-label-lg text-base py-4 px-8 rounded-full hover:bg-white hover:text-primary hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-label-lg text-base py-3.5 px-7 rounded-full hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
               >
-                {t('nav.dineInMenu')} <span className="material-symbols-outlined">restaurant_menu</span>
+                <span>{t('nav.dineInMenu')}</span>
+                <span className="material-symbols-outlined text-sm">restaurant_menu</span>
               </Link>
             </div>
 
-            {/* Trust row */}
-            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-white/70 text-xs mt-1">
-              <span className="flex items-center gap-1"><span className="text-secondary-fixed-dim">✓</span> No app download</span>
-              <span className="flex items-center gap-1"><span className="text-secondary-fixed-dim">✓</span> Order via WhatsApp</span>
-              <span className="flex items-center gap-1"><span className="text-secondary-fixed-dim">✓</span> Pay on delivery</span>
+            {/* Clean Trust Strip - No Pay on Delivery, No Clutter */}
+            <div className="flex items-center justify-center gap-3 sm:gap-4 text-white/75 text-xs pt-1">
+              <span className="flex items-center gap-1 font-medium">
+                <span className="text-secondary-fixed-dim font-bold">✓</span> 100% Halal
+              </span>
+              <span className="text-white/30">•</span>
+              <span className="flex items-center gap-1 font-medium">
+                <span className="text-secondary-fixed-dim font-bold">✓</span> 30–45 Mins Delivery
+              </span>
+              <span className="text-white/30">•</span>
+              <span className="flex items-center gap-1 font-medium">
+                <span className="text-secondary-fixed-dim font-bold">✓</span> WhatsApp Order
+              </span>
             </div>
           </div>
         </section>
