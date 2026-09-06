@@ -42,58 +42,118 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: "website",
+    locale: "en_IN",
     url: "https://thefilbey.com/",
+    siteName: "Filbey Fried Chicken & Burgers",
     title: "Filbey - A Little Crunch. A Lot of Comfort!",
     description:
-      "Enjoy our signature fried chicken, classic dynamite burgers, shakes, and more, served fresh and hot. 100% Halal certified.",
-    images: [{ url: "/filbey-storefront.jpg" }],
+      "Welcome to Filbey Fried Chicken & Burgers in Chennai! 100% Halal certified. Signature crispy fried chicken, dynamite burgers, loaded fries & shakes in Perungudi, OMR.",
+    images: [
+      {
+        url: "https://thefilbey.com/about-filbey-storefront.jpg",
+        width: 1200,
+        height: 900,
+        alt: "Filbey Fried Chicken & Burgers Storefront Perungudi Chennai",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Filbey - A Little Crunch. A Lot of Comfort!",
     description:
-      "Enjoy our signature fried chicken, classic dynamite burgers, shakes, and more, served fresh and hot. 100% Halal certified.",
-    images: ["/filbey-storefront.jpg"],
+      "Signature crispy fried chicken, dynamite burgers, loaded fries & shakes in Perungudi, OMR Chennai. 100% Halal certified.",
+    images: ["https://thefilbey.com/about-filbey-storefront.jpg"],
+  },
+  alternates: {
+    canonical: "https://thefilbey.com/",
   },
 };
 
 const restaurantJsonLd = {
   "@context": "https://schema.org",
-  "@type": "Restaurant",
+  "@type": ["Restaurant", "FastFoodRestaurant"],
   name: "Filbey Fried Chicken & Burgers",
-  image: "https://thefilbey.com/filbey-storefront.jpg",
-  "@id": "https://thefilbey.com/",
+  alternateName: "Filbey Chennai",
+  description:
+    "Filbey is Chennai's top-rated destination for 100% Halal crispy fried chicken, dynamite burgers, loaded fries, and specialty milkshakes, located on OMR, Perungudi.",
+  image: "https://thefilbey.com/about-filbey-storefront.jpg",
+  "@id": "https://thefilbey.com/#restaurant",
   url: "https://thefilbey.com/",
   telephone: "+91 81223 56144",
-  servesCuisine: ["Fast Food", "Fried Chicken", "Burgers", "Halal"],
+  priceRange: "₹₹ (₹150 - ₹500)",
+  currenciesAccepted: "INR",
+  paymentAccepted: "Cash, Credit Card, Debit Card, UPI, Google Pay, PhonePe, Paytm",
+  servesCuisine: [
+    "Fried Chicken",
+    "Burgers",
+    "Fast Food",
+    "Halal",
+    "American Fast Food",
+    "Milkshakes",
+    "Wraps",
+  ],
+  hasMenu: "https://thefilbey.com/menu",
+  menu: "https://thefilbey.com/menu",
+  acceptsReservations: "False",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "OMR",
+    streetAddress: "OMR Road, Near Perungudi Toll Plaza",
     addressLocality: "Perungudi",
     addressRegion: "Chennai",
+    postalCode: "600096",
     addressCountry: "IN",
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: "12.9696",
-    longitude: "80.2435",
+    latitude: 12.9696,
+    longitude: 80.2435,
   },
-  openingHoursSpecification: {
-    "@type": "OpeningHoursSpecification",
-    dayOfWeek: [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ],
-    opens: "11:00",
-    closes: "23:00",
+  areaServed: [
+    { "@type": "Place", name: "Perungudi, Chennai" },
+    { "@type": "Place", name: "Kandanchavadi, Chennai" },
+    { "@type": "Place", name: "Thoraipakkam, Chennai" },
+    { "@type": "Place", name: "OMR, Chennai" },
+  ],
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      opens: "11:30",
+      closes: "23:30",
+    },
+  ],
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    reviewCount: "500",
+    bestRating: "5",
+    worstRating: "1",
   },
-  menu: "https://thefilbey.com/menu",
-  acceptsReservations: "False",
+  sameAs: [
+    "https://www.instagram.com/thefilbey/",
+    "https://maps.app.goo.gl/w5SU8wuf79VM7HtW9",
+  ],
+  potentialAction: {
+    "@type": "OrderAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://thefilbey.com/order",
+      inLanguage: "en-IN",
+      actionPlatform: [
+        "http://schema.org/DesktopWebPlatform",
+        "http://schema.org/MobileWebPlatform",
+      ],
+    },
+    deliveryMethod: "http://purl.org/goodrelations/v1#DeliveryModeDirectDownload",
+  },
 };
 
 export default function RootLayout({

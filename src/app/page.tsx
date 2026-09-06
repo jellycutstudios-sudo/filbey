@@ -436,6 +436,57 @@ export default function Home() {
 
         {/* ── FAQ Section ── */}
         <section className="py-margin-desktop bg-surface px-margin-mobile md:px-margin-desktop" id="faq">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "Where is Filbey located in Chennai?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Filbey is located on OMR Road in Perungudi, Chennai, easily accessible for dine-in, takeaway, and delivery."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Is Filbey 100% Halal certified?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes, all chicken and meats prepared at Filbey are 100% Halal certified, fresh, and never frozen."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "What are Filbey's opening hours?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Filbey is open 7 days a week from Monday to Sunday, 11:30 AM to 11:30 PM."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Do you offer vegetarian options?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes! We serve dedicated vegetarian options including Paneer Crunch Burgers, Veg Wraps, and Crispy Veg Nuggets."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Does Filbey deliver in Chennai?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes, Filbey delivers directly within a 5 km radius across Perungudi, Kandanchavadi, Thoraipakkam, and OMR, with free delivery on orders above ₹499."
+                    }
+                  }
+                ]
+              })
+            }}
+          />
           <div className="max-w-container-max mx-auto">
             <div className="flex flex-col items-center text-center mb-stack-lg">
               <h2 className="font-display text-headline-lg-mobile md:text-headline-lg text-primary uppercase">
