@@ -151,8 +151,7 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
                 <button
                   id="use-gps-btn"
                   onClick={handleGPS}
-                  disabled={!open}
-                  className="flex items-center justify-center gap-2 bg-primary text-white font-label-lg text-label-lg py-3.5 rounded-full hover:bg-primary-container hover:shadow-[0_8px_30px_rgba(93,0,12,0.3)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 bg-primary text-white font-label-lg text-label-lg py-3.5 rounded-full hover:bg-primary-container hover:shadow-[0_8px_30px_rgba(93,0,12,0.3)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-lg">my_location</span>
                   Use My Location
@@ -168,7 +167,7 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
                   <button
                     id="retry-gps-btn"
                     onClick={handleGPS}
-                    className="flex items-center justify-center gap-2 border-2 border-primary text-primary font-label-lg text-sm py-3 rounded-full hover:bg-primary/5 transition-all"
+                    className="flex items-center justify-center gap-2 border-2 border-primary text-primary font-label-lg text-sm py-3 rounded-full hover:bg-primary/5 transition-all cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-lg">my_location</span>
                     Try Again with GPS
@@ -190,16 +189,24 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
                   onChange={e => { setManualArea(e.target.value); setManualError(''); }}
                   placeholder="Enter your area (e.g. Sholinganallur)"
                   className="w-full px-4 py-3 bg-surface-container-low rounded-xl border border-surface-variant/30 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-sm"
-                  disabled={!open}
                 />
                 {manualError && <p className="text-xs text-error ml-1">{manualError}</p>}
                 <button
                   id="check-area-btn"
                   onClick={handleManualCheck}
-                  disabled={!open || manualArea.trim().length < 3}
-                  className="bg-surface-container text-on-surface font-label-lg text-label-lg py-3 rounded-full border border-surface-variant/20 hover:bg-surface-container-high transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={manualArea.trim().length < 3}
+                  className="bg-surface-container text-on-surface font-label-lg text-label-lg py-3 rounded-full border border-surface-variant/20 hover:bg-surface-container-high transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
                   Check Availability
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onConfirm({ distance: 2.0, fee: 39, locationName: 'Perungudi (Core Zone)' })}
+                  className="mt-2 w-full py-2.5 rounded-full border border-dashed border-primary/40 text-xs font-bold text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-sm">restaurant_menu</span>
+                  <span>Browse Menu First (Skip Location) →</span>
                 </button>
               </div>
             </div>
