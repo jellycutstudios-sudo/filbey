@@ -34,13 +34,13 @@ export default function Footer() {
             <p>{t('footer.location')}</p>
           </Link>
           <Link
-            href="tel:+916383400144"
+            href="tel:+918122356144"
             className="flex items-start gap-2 mt-2 text-surface-variant/70 font-body-md text-body-md hover:text-secondary-container transition-colors"
           >
             <span className="material-symbols-outlined text-secondary-container mt-1">
               call
             </span>
-            <p>+91 63834 00144</p>
+            <p>+91 81223 56144</p>
           </Link>
         </div>
 
@@ -55,7 +55,7 @@ export default function Footer() {
           <div className="flex gap-4 mt-4 md:justify-end">
             {/* WhatsApp */}
             <Link
-              href="https://wa.me/916383400144"
+              href="https://wa.me/918122356144"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Chat on WhatsApp"

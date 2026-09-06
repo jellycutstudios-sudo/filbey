@@ -1,188 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
-
-interface MenuItem {
-  name: string;
-  desc?: string;
-  price?: number; // for single price
-  prices?: { label: string; price: number }[]; // for multi-price options
-  badge?: 'POPULAR' | 'SPECIAL' | 'HOT' | 'SIGNATURE' | '';
-  isVeg?: boolean;
-  isSpicy?: boolean;
-  isPopular?: boolean;
-}
-
-interface Category {
-  id: string;
-  title: string;
-  icon: string;
-  items: MenuItem[];
-}
-
-const MENU_DATA: Category[] = [
-  {
-    id: 'chicken-meals',
-    title: 'Chicken Meals',
-    icon: 'restaurant',
-    items: [
-      { name: 'Snack Meal', desc: '2 Pc Chicken + Fries + Drink', price: 269 },
-      { name: '8 Pc Chicken', desc: '8 Pc Chicken + 4 Dips + 2 Bun + Fries', price: 799, badge: 'POPULAR', isPopular: true },
-      { name: '6 Pc Wings', desc: '6 Wings + 1 Dip + Bun + Fries', price: 279 },
-      { name: '4 Pc Chicken', desc: '4 Pc Chicken + 2 Dips + 1 Bun + Fries', price: 449 },
-      { name: '5 Pc Strips', desc: '5 boneless + 1 Dip + Bun + Fries', price: 319 },
-      { name: 'Mix Combo', desc: '3 Strips + 3 Wings + 1 Dip + Bun + Fries', price: 339 },
-    ],
-  },
-  {
-    id: 'signature-chicken',
-    title: 'Signature Buckets',
-    icon: 'local_fire_department',
-    items: [
-      {
-        name: 'Signature Chicken',
-        desc: 'Served with Garlic Mayonnaise',
-        prices: [
-          { label: '2 Pc', price: 199 },
-          { label: '4 Pc', price: 379 },
-          { label: '8 Pc', price: 719 },
-        ],
-      },
-      { name: 'Extra Piece', price: 99 },
-      {
-        name: 'Filbey Party Bucket',
-        desc: '10 Strips · 10 Wings · 4 Dips',
-        price: 799,
-        badge: 'SIGNATURE',
-        isPopular: true,
-      },
-      {
-        name: '20 Pc Peri Peri Strips',
-        desc: '20 Pc Boneless Strips · 4 Dips',
-        price: 899,
-        badge: 'SIGNATURE',
-        isPopular: true,
-        isSpicy: true,
-      },
-    ],
-  },
-  {
-    id: 'burgers',
-    title: 'Burgers',
-    icon: 'lunch_dining',
-    items: [
-      { name: 'Filbey Classic Burger', price: 179, badge: 'POPULAR', isPopular: true },
-      { name: 'Dynamite Burger', price: 209, isSpicy: true },
-      { name: 'Veg Classic Burger', price: 139, isVeg: true },
-      { name: 'Cheese Crunch Burger', price: 199 },
-      { name: 'Double Crunch Burger', price: 259, isPopular: true },
-      { name: 'Paneer Crunch Burger', price: 179, isVeg: true },
-    ],
-  },
-  {
-    id: 'wraps-sandwiches',
-    title: 'Wraps & Sandwiches',
-    icon: 'layers',
-    items: [
-      { name: 'Crispy Chicken Wrap', price: 169 },
-      { name: 'Dynamite Chicken Wrap', price: 189, isSpicy: true },
-      { name: 'Paneer Wrap', price: 159, isVeg: true },
-      { name: 'Veg Wrap', price: 129, isVeg: true },
-      { name: 'Chicken Club Sandwich', price: 219 },
-      { name: 'Veg Club Sandwich', price: 199, isVeg: true },
-    ],
-  },
-  {
-    id: 'wings-strips',
-    title: 'Wings & Strips',
-    icon: 'sports_bar',
-    items: [
-      {
-        name: 'Crispy Wings',
-        prices: [
-          { label: '6 Pc', price: 189 },
-          { label: '10 Pc', price: 299 },
-        ],
-      },
-      {
-        name: 'Dynamite Wings',
-        isSpicy: true,
-        prices: [
-          { label: '6 Pc', price: 219 },
-          { label: '10 Pc', price: 329 },
-        ],
-      },
-      {
-        name: 'Boneless Strips',
-        prices: [
-          { label: '3 Pc', price: 139 },
-          { label: '5 Pc', price: 229 },
-          { label: '9 Pc', price: 369 },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'loaded-snacks',
-    title: 'Sides & Snacks',
-    icon: 'fastfood',
-    items: [
-      { name: 'Chilli Cheese Fries', desc: 'Fries · Chilli Mix · Cheese Sauce · Jalapeño', price: 169, isSpicy: true },
-      { name: 'Chicken Loaded Fries', desc: 'Fries · Chicken Popcorn · Cheese · Drizzle', price: 199, badge: 'POPULAR', isPopular: true },
-      { name: 'Veg Nuggets', price: 119, isVeg: true },
-      { name: 'Corn Cheese Nuggets', price: 139, isVeg: true },
-      { name: 'Chicken Nuggets', price: 139 },
-      { name: 'Chicken Popcorn', price: 159 },
-      { name: 'Dynamite Popcorn', price: 179, isSpicy: true },
-    ],
-  },
-  {
-    id: 'beverages-desserts',
-    title: 'Drinks & Treats',
-    icon: 'local_cafe',
-    items: [
-      { name: 'Lotus Biscoff Shake', price: 179, badge: 'SPECIAL', isPopular: true },
-      { name: 'Vanilla Shake', price: 129 },
-      { name: 'Chocolate Shake', price: 129 },
-      { name: 'Strawberry Shake', price: 129 },
-      { name: 'Mango Shake', price: 129 },
-      { name: 'Tender Coconut Shake', price: 139 },
-      { name: 'Oreo Shake', price: 139 },
-      { name: 'Cold Milo', price: 159 },
-      { name: 'Cold Coffee', price: 129 },
-      { name: 'Lemon Iced Tea', price: 119 },
-      { name: 'Peach Iced Tea', price: 119 },
-      { name: 'Mojitos (Mint/Apple/Berry/Blue)', desc: 'Available in Lemon Mint, Green Apple, Passion Fruit, Watermelon, Cool Blue', price: 119 },
-      { name: 'Hot Coffee', price: 30 },
-      { name: 'Hot Chocolate', price: 90 },
-      { name: 'Fresh Lemonade', price: 49, isVeg: true },
-      { name: 'Watermelon Juice', price: 80, isVeg: true },
-      { name: 'Mosambi Juice', price: 80, isVeg: true },
-      { name: 'Papaya Juice', price: 80, isVeg: true },
-      { name: 'Pineapple Juice', price: 80, isVeg: true },
-      { name: 'Orange Juice', price: 90, isVeg: true },
-      { name: 'Chocolate Brownie', price: 99 },
-      { name: 'Brownie + Ice Cream', price: 139 },
-      { name: 'Royal Falooda', price: 169, badge: 'SPECIAL', isPopular: true },
-    ],
-  },
-  {
-    id: 'addons-extras',
-    title: 'Sides & Add-ons',
-    icon: 'add_circle',
-    items: [
-      { name: 'French Fries', price: 109, isVeg: true },
-      { name: 'Masala Fries', price: 119, isVeg: true },
-      { name: 'Corn in a Cup', price: 59, isVeg: true },
-      { name: 'Coleslaw Salad', price: 49, isVeg: true },
-      { name: 'Garlic Mayo Dip', price: 25 },
-      { name: 'Spicy Mayo Dip', price: 25, isSpicy: true },
-      { name: 'Slice Cheese', price: 25, isVeg: true },
-      { name: '2 Bread Buns', price: 30, isVeg: true },
-    ],
-  },
-];
+import { MENU_DATA } from '@/data/menuData';
 
 export default function MenuClient() {
   const { t, translateMenu } = useLanguage();
@@ -191,14 +12,14 @@ export default function MenuClient() {
   const [activeCategory, setActiveCategory] = useState(menuData[0]?.id || '');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'VEG' | 'SPICY' | 'POPULAR'>('ALL');
-  
+
   const categoryRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   const scrollToCategory = (id: string) => {
     setActiveCategory(id);
     const element = categoryRefs.current[id];
     if (element) {
-      const offset = 100; // Account for fixed navbar
+      const offset = 120;
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
@@ -215,13 +36,12 @@ export default function MenuClient() {
   const filteredMenu = useMemo(() => {
     return menuData.map((cat) => {
       const items = cat.items.filter((item) => {
-        // Search term matching
-        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        const matchesSearch =
+          item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (item.desc && item.desc.toLowerCase().includes(searchTerm.toLowerCase()));
-        
+
         if (!matchesSearch) return false;
 
-        // Filter toggles
         if (activeFilter === 'VEG') return item.isVeg;
         if (activeFilter === 'SPICY') return item.isSpicy;
         if (activeFilter === 'POPULAR') return item.isPopular;
@@ -237,7 +57,6 @@ export default function MenuClient() {
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
     if (hash) {
-      // Small delay to let sections render first
       const timer = setTimeout(() => {
         scrollToCategory(hash);
       }, 300);
@@ -248,8 +67,8 @@ export default function MenuClient() {
   // Handle active scroll highlight
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 150; // offset
-      
+      const scrollPosition = window.scrollY + 160;
+
       for (const cat of menuData) {
         const ref = categoryRefs.current[cat.id];
         if (ref) {
@@ -268,10 +87,12 @@ export default function MenuClient() {
   }, [menuData]);
 
   return (
-    <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mt-4">
+    <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mt-4 pb-20">
       {/* Title */}
-      <section className="text-center mb-10 mt-4">
-        <h1 className="font-display text-display text-primary uppercase">{t('menu.heroTitle')}</h1>
+      <section className="text-center mb-8 mt-4">
+        <h1 className="font-display text-headline-lg-mobile md:text-display text-primary uppercase">
+          {t('menu.heroTitle')}
+        </h1>
         <p className="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl mx-auto">
           {t('menu.heroDesc')}{' '}
           <br />
@@ -279,14 +100,25 @@ export default function MenuClient() {
             {t('menu.heroSub')}
           </span>
         </p>
+
+        {/* CTA to online order */}
+        <div className="mt-4 flex justify-center">
+          <Link
+            href="/order"
+            className="inline-flex items-center gap-2 bg-primary text-white font-label-lg px-6 py-2.5 rounded-full shadow-md hover:bg-primary-container hover:scale-105 transition-all text-sm"
+          >
+            <span className="material-symbols-outlined text-lg">delivery_dining</span>
+            Order Online for Home Delivery
+            <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          </Link>
+        </div>
       </section>
 
       {/* Search and Filters Bar */}
-      <div className="bg-surface-container/60 backdrop-blur-md sticky top-20 z-40 py-4 px-6 rounded-2xl flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm border border-surface-variant/20 mb-8">
-        
+      <div className="bg-surface-container/60 backdrop-blur-md sticky top-20 z-40 py-3 px-4 md:px-6 rounded-2xl flex flex-col md:flex-row gap-3 justify-between items-center shadow-sm border border-surface-variant/20 mb-8">
         {/* Search */}
         <div className="relative w-full md:max-w-xs">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 text-lg">
             search
           </span>
           <input
@@ -294,12 +126,12 @@ export default function MenuClient() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('menu.searchPlaceholder')}
-            className="w-full pl-10 pr-4 py-2 bg-white rounded-full border border-surface-variant/30 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all font-body-md"
+            className="w-full pl-10 pr-4 py-2 bg-white rounded-full border border-surface-variant/30 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all font-body-md text-sm"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-primary transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-primary transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm">close</span>
             </button>
@@ -317,52 +149,53 @@ export default function MenuClient() {
             <button
               key={filter.id}
               onClick={() => setActiveFilter(filter.id as 'ALL' | 'VEG' | 'SPICY' | 'POPULAR')}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-label-lg text-label-lg transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full font-label-lg text-label-lg transition-all cursor-pointer text-xs ${
                 activeFilter === filter.id
-                  ? 'bg-primary text-white shadow-md scale-105'
-                  : 'bg-white hover:bg-surface-container text-on-surface-variant border border-surface-variant/20'
+                  ? 'bg-primary text-on-primary shadow-md scale-105'
+                  : 'bg-white text-on-surface-variant border border-surface-variant/20 hover:bg-surface-container'
               }`}
             >
-              <span className="material-symbols-outlined text-sm">{filter.icon}</span>
+              <span className="material-symbols-outlined text-xs">{filter.icon}</span>
               {filter.label}
             </button>
           ))}
         </div>
       </div>
 
+      {/* Main Layout: Sidebar + Dishes */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
-        {/* Navigation Sidebar (Desktop Only) */}
-        <aside className="hidden lg:block lg:col-span-3 sticky top-[180px] bg-white menu-card-shadow rounded-2xl p-4 border border-surface-variant/10">
-          <h3 className="font-headline-md text-xl text-primary uppercase border-b border-surface-variant/20 pb-2 mb-4 px-2">
-            {t('menu.categories')}
+        {/* Sidebar (Desktop) */}
+        <aside className="hidden lg:block lg:col-span-3 sticky top-[150px] bg-white rounded-2xl p-4 border border-surface-variant/10 shadow-sm">
+          <h3 className="font-headline-md text-xl text-primary uppercase border-b border-surface-variant/20 pb-2 mb-3 px-2">
+            Categories
           </h3>
-          <nav className="flex flex-col gap-1.5">
+          <nav className="flex flex-col gap-1">
             {menuData.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => scrollToCategory(cat.id)}
-                className={`flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-xl font-label-lg transition-all cursor-pointer ${
+                className={`flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-xl font-label-lg text-label-lg transition-all cursor-pointer ${
                   activeCategory === cat.id
                     ? 'bg-primary-fixed text-primary font-bold border-l-4 border-primary'
                     : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
                 }`}
               >
-                <span className="material-symbols-outlined text-xl">{cat.icon}</span>
-                <span>{cat.title}</span>
+                <span className="material-symbols-outlined text-lg">{cat.icon}</span>
+                {cat.title}
               </button>
             ))}
           </nav>
         </aside>
 
-        {/* Categories Scroller (Mobile Only) */}
-        <div className="lg:hidden w-full overflow-x-auto no-scrollbar flex gap-2 pb-4 mb-4 sticky top-[160px] z-30 bg-background py-2">
+        {/* Mobile Horizontal Category Bar */}
+        <div className="lg:hidden w-full overflow-x-auto no-scrollbar flex gap-2 pb-2 mb-4 sticky top-[135px] z-30 bg-background py-2">
           {menuData.map((cat) => (
             <button
               key={cat.id}
               onClick={() => scrollToCategory(cat.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap font-label-lg text-sm transition-all shadow-sm ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap font-label-lg text-xs transition-all shadow-sm flex-shrink-0 cursor-pointer ${
                 activeCategory === cat.id
-                  ? 'bg-primary-fixed text-primary border border-primary font-bold'
+                  ? 'bg-primary text-white'
                   : 'bg-white text-on-surface-variant border border-surface-variant/20'
               }`}
             >
@@ -372,11 +205,11 @@ export default function MenuClient() {
           ))}
         </div>
 
-        {/* Menu Items Area */}
-        <div className="lg:col-span-9 flex flex-col gap-10">
+        {/* Dishes Grid */}
+        <div className="lg:col-span-9 flex flex-col gap-8">
           {filteredMenu.length === 0 ? (
-            <div className="bg-white rounded-2xl p-16 text-center menu-card-shadow border border-surface-variant/10">
-              <span className="material-symbols-outlined text-6xl text-primary/30 mb-4">
+            <div className="bg-white rounded-2xl p-16 text-center border border-surface-variant/10">
+              <span className="material-symbols-outlined text-6xl text-primary/30 mb-4 block">
                 sentiment_dissatisfied
               </span>
               <h3 className="font-headline-md text-2xl text-on-surface">{t('menu.noDishesTitle')}</h3>
@@ -391,68 +224,129 @@ export default function MenuClient() {
                 ref={(el) => {
                   categoryRefs.current[cat.id] = el;
                 }}
-                className="bg-white rounded-2xl menu-card-shadow p-6 md:p-8 border border-surface-variant/10 transition-all hover:shadow-md scroll-mt-28"
+                className="bg-white rounded-2xl p-5 md:p-6 border border-surface-variant/10 shadow-sm scroll-mt-28"
               >
-                <h2 className="font-headline-lg text-2xl md:text-3xl text-primary uppercase border-b-2 border-primary-container pb-2 mb-6 flex items-center gap-3">
+                <h2 className="font-headline-lg text-xl md:text-2xl text-primary uppercase border-b-2 border-primary-container pb-2 mb-6 flex items-center gap-3">
                   <span className="material-symbols-outlined text-2xl md:text-3xl text-secondary">
                     {cat.icon}
                   </span>
                   {cat.title}
+                  <span className="text-xs text-on-surface-variant font-normal normal-case ml-auto">
+                    {cat.items.length} dishes
+                  </span>
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {cat.items.map((item, idx) => (
                     <div
                       key={idx}
-                      className="group flex flex-col justify-between p-4 rounded-xl border border-surface-variant/20 bg-surface-container-lowest/50 hover:bg-surface-container-low transition-all duration-200"
+                      className="group flex items-start justify-between gap-3 p-4 rounded-2xl border border-surface-variant/20 bg-surface-container-lowest/50 hover:bg-surface-container-low hover:border-primary/30 transition-all duration-300"
                     >
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="font-label-lg text-lg text-on-surface uppercase flex items-center gap-2 group-hover:text-primary transition-colors">
+                      {/* Left: Info */}
+                      <div className="flex-1 min-w-0 pr-1 flex flex-col justify-between h-full">
+                        <div>
+                          {/* Badges & Veg/Non-Veg */}
+                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                            {item.isVeg ? (
+                              <span
+                                className="w-4 h-4 rounded-[4px] border border-green-600 flex items-center justify-center p-[2px] flex-shrink-0 bg-white"
+                                title="Pure Veg"
+                              >
+                                <span className="w-2 h-2 rounded-full bg-green-600"></span>
+                              </span>
+                            ) : (
+                              <span
+                                className="w-4 h-4 rounded-[4px] border border-red-700 flex items-center justify-center p-[2px] flex-shrink-0 bg-white"
+                                title="Non-Veg"
+                              >
+                                <span className="w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-b-[6px] border-b-red-700"></span>
+                              </span>
+                            )}
+
+                            {item.badge === 'BEST SELLER' && (
+                              <span className="bg-amber-50 text-amber-800 border border-amber-300 font-bold text-[10px] px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                                ⭐ BESTSELLER
+                              </span>
+                            )}
+                            {item.badge === 'POPULAR' && (
+                              <span className="bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[10px] px-2 py-0.5 rounded-full">
+                                ★ {t('home.popular')}
+                              </span>
+                            )}
+                            {item.badge === 'HOT' && (
+                              <span className="bg-red-50 text-red-700 border border-red-200 font-bold text-[10px] px-2 py-0.5 rounded-full">
+                                🔥 {t('badge.hot')}
+                              </span>
+                            )}
+                            {item.badge === 'SIGNATURE' && (
+                              <span className="bg-primary/10 text-primary border border-primary/25 font-bold text-[10px] px-2 py-0.5 rounded-full">
+                                👑 {t('badge.signature')}
+                              </span>
+                            )}
+                            {item.badge === 'SPECIAL' && (
+                              <span className="bg-pink-50 text-pink-700 border border-pink-200 font-bold text-[10px] px-2 py-0.5 rounded-full">
+                                ✨ {t('badge.special')}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Name */}
+                          <h3 className="font-headline-md text-base md:text-lg text-on-surface font-bold leading-snug group-hover:text-primary transition-colors">
                             {item.name}
-                            {item.isVeg && <span className="text-sm">🌱</span>}
-                            {item.isSpicy && <span className="text-sm">🌶️</span>}
                           </h3>
-                          {item.badge && (
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full select-none ${
-                              item.badge === 'POPULAR' ? 'bg-[#fdae41]/20 text-[#6d4400]' :
-                              item.badge === 'SPECIAL' ? 'bg-[#ffb3af]/30 text-[#891b22]' :
-                              'bg-primary text-white'
-                            }`}>
-                              {item.badge === 'POPULAR' ? t('home.popular') : 
-                               item.badge === 'SPECIAL' ? t('badge.special') : 
-                               item.badge === 'SIGNATURE' ? t('badge.signature') : 
-                               t('badge.hot')}
-                            </span>
+
+                          {/* Price */}
+                          {item.price ? (
+                            <div className="mt-1 font-extrabold text-base md:text-lg text-on-surface">
+                              ₹{item.price}
+                            </div>
+                          ) : item.prices ? (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                              {item.prices.map((p, pIdx) => (
+                                <span
+                                  key={pIdx}
+                                  className="bg-surface-container border border-surface-variant/25 text-xs font-semibold py-0.5 px-2 rounded-lg text-on-surface flex items-center gap-1"
+                                >
+                                  <span className="text-on-surface-variant text-[11px]">{p.label}:</span>
+                                  <strong className="text-primary">₹{p.price}</strong>
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
+
+                          {/* Description */}
+                          {item.desc && (
+                            <p className="font-body-sm text-xs md:text-sm text-on-surface-variant/80 mt-1.5 line-clamp-2 leading-relaxed">
+                              {item.desc}
+                            </p>
                           )}
                         </div>
-                        {item.desc && (
-                          <p className="font-body-sm text-sm text-on-surface-variant/80 mt-1 line-clamp-2">
-                            {item.desc}
-                          </p>
-                        )}
+
+                        {/* Order action link */}
+                        <div className="mt-3 pt-2 border-t border-surface-variant/10">
+                          <Link
+                            href="/order"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-container transition-colors"
+                          >
+                            Order this dish <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                          </Link>
+                        </div>
                       </div>
 
-                      <div className="flex items-center justify-between mt-4 pt-2 border-t border-surface-variant/10">
-                        {item.price ? (
-                          <span className="bg-primary-fixed/30 text-primary font-bold py-1 px-3.5 rounded-full text-base">
-                            ₹ {item.price}
-                          </span>
-                        ) : item.prices ? (
-                          <div className="flex gap-2">
-                            {item.prices.map((p, pIdx) => (
-                              <div
-                                key={pIdx}
-                                className="bg-surface-container border border-surface-variant/20 flex flex-col items-center leading-tight py-1 px-2.5 rounded-lg text-xs"
-                              >
-                                <span className="text-[10px] text-on-surface-variant/80 font-normal">
-                                  {p.label}
-                                </span>
-                                <span className="font-bold text-primary">₹{p.price}</span>
-                              </div>
-                            ))}
+                      {/* Right: Photo */}
+                      <div className="relative flex-shrink-0 w-28 md:w-32 h-28 md:h-32 rounded-2xl overflow-hidden bg-white border border-surface-variant/20 shadow-xs flex items-center justify-center">
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-surface-container-low text-primary/30">
+                            <span className="material-symbols-outlined text-4xl">restaurant</span>
                           </div>
-                        ) : null}
+                        )}
                       </div>
                     </div>
                   ))}

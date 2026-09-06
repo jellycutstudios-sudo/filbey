@@ -34,7 +34,7 @@ const menuJsonLd = {
   image: 'https://thefilbey.com/Document.png',
   '@id': 'https://thefilbey.com/',
   url: 'https://thefilbey.com/',
-  telephone: '+91 63834 00144',
+  telephone: '+91 81223 56144',
   servesCuisine: ['Fast Food', 'Fried Chicken', 'Burgers', 'Halal'],
   address: {
     '@type': 'PostalAddress',

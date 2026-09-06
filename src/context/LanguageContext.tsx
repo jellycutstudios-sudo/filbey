@@ -9,7 +9,8 @@ export interface MenuItem {
   desc?: string;
   price?: number;
   prices?: { label: string; price: number }[];
-  badge?: 'POPULAR' | 'SPECIAL' | 'HOT' | 'SIGNATURE' | '';
+  image?: string;
+  badge?: 'POPULAR' | 'SPECIAL' | 'HOT' | 'SIGNATURE' | 'BEST SELLER' | '';
   isVeg?: boolean;
   isSpicy?: boolean;
   isPopular?: boolean;

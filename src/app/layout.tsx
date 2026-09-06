@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Anton, Inter, Baloo_Thambi_2 } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { CartProvider } from "@/context/CartContext";
 
 const anton = Anton({
   weight: "400",
@@ -64,7 +65,7 @@ const restaurantJsonLd = {
   image: "https://thefilbey.com/Document.png",
   "@id": "https://thefilbey.com/",
   url: "https://thefilbey.com/",
-  telephone: "+91 63834 00144",
+  telephone: "+91 81223 56144",
   servesCuisine: ["Fast Food", "Fried Chicken", "Burgers", "Halal"],
   address: {
     "@type": "PostalAddress",
@@ -117,11 +118,13 @@ export default function RootLayout({
       </head>
       <body className="bg-background text-on-background antialiased overflow-x-hidden">
         <LanguageProvider>
-          {children}
+          <CartProvider>
+            {children}
+          </CartProvider>
         </LanguageProvider>
         {/* WhatsApp Floating Button */}
         <a
-          href="https://wa.me/916383400144"
+          href="https://wa.me/918122356144"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat with us on WhatsApp"

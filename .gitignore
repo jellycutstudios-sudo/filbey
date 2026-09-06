@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# menu extraction scratch files
+/public/menu_pages/
+/public/images/menu_raw/
+/public/images/menu_items/
+test_masked_*.png
+remove_temples_*.jpeg
+

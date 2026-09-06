@@ -203,7 +203,7 @@ export default function Home() {
             {/* Bento Grid */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-margin-desktop">
               {/* Signature Chicken - large */}
-              <Link href="/menu#signature-chicken" className="md:col-span-8 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
+              <Link href="/menu#fried-chicken" className="md:col-span-8 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
                 <Image src="/Signature Chicken.png" alt="Filbey Signature Fried Chicken Bucket Meal" fill sizes="(max-width: 768px) 100vw, 66vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full flex justify-between items-end">
@@ -229,7 +229,7 @@ export default function Home() {
               </Link>
 
               {/* Signature Shakes */}
-              <Link href="/menu#beverages" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
+              <Link href="/menu#drinks-desserts" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
                 <Image src="/Signature Shakes.png" alt="Filbey Signature Lotus Biscoff Milkshake" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-6 w-full">
@@ -239,7 +239,7 @@ export default function Home() {
               </Link>
 
               {/* Wraps & Sides */}
-              <Link href="/menu#wraps" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
+              <Link href="/menu#wraps-sides" className="md:col-span-6 relative rounded-[24px] overflow-hidden group menu-card-shadow aspect-[4/3] md:aspect-auto h-full md:min-h-[300px] block">
                 <Image src="/Wraps & Sides.png" alt="Filbey Crispy Chicken Wraps and Loaded Fries Sides" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-6 w-full">

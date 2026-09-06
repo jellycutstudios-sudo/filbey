@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
+import { useCart } from '@/context/CartContext';
 
 const navLinks = [
   { key: 'nav.aboutUs', label: 'About Us', href: '/about' },
@@ -22,6 +23,7 @@ interface NavbarProps {
 export default function Navbar({ isMenuPage = false }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const { itemCount } = useCart();
 
   return (
     <>
@@ -40,15 +42,30 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
           </Link>
 
           {/* Header Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Order Now CTA */}
+            <Link
+              href="/order"
+              className="relative flex items-center gap-1.5 bg-primary text-white font-label-lg text-xs md:text-sm px-3 md:px-4 py-2 rounded-full hover:bg-primary-container hover:shadow-[0_4px_16px_rgba(93,0,12,0.35)] hover:-translate-y-0.5 transition-all duration-200"
+              aria-label="Order Now"
+            >
+              <span className="material-symbols-outlined text-sm">delivery_dining</span>
+              <span className="hidden sm:inline">Order Now</span>
+              {itemCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
+
             {/* Language Switcher */}
             <button
               onClick={() => setLanguage(language === 'en' ? 'ta' : 'en')}
-              className="px-3.5 py-1.5 rounded-full border border-primary/20 hover:border-primary/50 text-xs font-semibold transition-all bg-white/50 backdrop-blur-sm shadow-sm flex items-center gap-1.5 text-primary cursor-pointer hover:scale-105"
+              className="px-3 py-1.5 rounded-full border border-primary/20 hover:border-primary/50 text-xs font-semibold transition-all bg-white/50 backdrop-blur-sm shadow-sm flex items-center gap-1.5 text-primary cursor-pointer hover:scale-105"
               aria-label="Switch Language"
             >
               <span className="material-symbols-outlined text-[16px] font-semibold">translate</span>
-              <span>{language === 'en' ? 'தமிழ்' : 'English'}</span>
+              <span className="hidden sm:inline">{language === 'en' ? 'தமிழ்' : 'English'}</span>
             </button>
 
             {/* Toggle Button */}
@@ -128,11 +145,21 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
             className={`w-full max-w-sm flex flex-col gap-4 items-center flex-shrink-0 transform transition-all duration-700 ease-out ${open ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
             style={{ transitionDelay: '800ms' }}
           >
+            {/* Order Online — always visible */}
+            <Link
+              href="/order"
+              onClick={() => setOpen(false)}
+              className="group flex items-center justify-center bg-primary text-on-primary font-label-lg text-lg py-3 px-10 rounded-full hover:bg-primary-container hover:shadow-[0_8px_30px_rgba(93,0,12,0.4)] hover:-translate-y-1 transition-all duration-300 w-full"
+            >
+              <span className="material-symbols-outlined mr-2 group-hover:-translate-y-0.5 transition-transform">delivery_dining</span>
+              {t('nav.orderNow')}
+            </Link>
+
             {isMenuPage ? (
               <Link
                 href="/"
                 onClick={() => setOpen(false)}
-                className="group flex items-center justify-center bg-primary text-on-primary font-label-lg text-lg py-3 px-10 rounded-full hover:bg-primary-container hover:shadow-[0_8px_30px_rgba(93,0,12,0.4)] hover:-translate-y-1 transition-all duration-300 w-full"
+                className="group flex items-center justify-center border border-primary/30 text-primary font-label-lg text-base py-3 px-10 rounded-full hover:bg-primary/5 transition-all duration-300 w-full"
               >
                 {t('nav.backToHome')} <span className="material-symbols-outlined ml-2 group-hover:translate-x-1 transition-transform">home</span>
               </Link>
@@ -140,7 +167,7 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
               <Link
                 href="/menu"
                 onClick={() => setOpen(false)}
-                className="group flex items-center justify-center bg-primary text-on-primary font-label-lg text-lg py-3 px-10 rounded-full hover:bg-primary-container hover:shadow-[0_8px_30px_rgba(93,0,12,0.4)] hover:-translate-y-1 transition-all duration-300 w-full"
+                className="group flex items-center justify-center border border-primary/30 text-primary font-label-lg text-base py-3 px-10 rounded-full hover:bg-primary/5 transition-all duration-300 w-full"
               >
                 {t('nav.dineInMenu')} <span className="material-symbols-outlined ml-2 group-hover:translate-x-1 transition-transform">restaurant_menu</span>
               </Link>
