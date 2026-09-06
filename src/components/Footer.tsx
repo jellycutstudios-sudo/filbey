@@ -89,12 +89,12 @@ export default function Footer() {
         <p className="text-surface-variant/50 font-label-sm text-label-sm">
           {t('footer.madeWith')}{' '}
           <Link
-            href="https://www.instagram.com/salman.abu_/"
+            href="https://www.jellycutstudio.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-surface-variant/70 hover:text-secondary-container transition-colors font-medium underline underline-offset-4"
           >
-            salman abu
+            Jelly Cut Studio
           </Link>
         </p>
       </div>
