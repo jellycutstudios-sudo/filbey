@@ -46,14 +46,14 @@ export const metadata: Metadata = {
     title: "Filbey - A Little Crunch. A Lot of Comfort!",
     description:
       "Enjoy our signature fried chicken, classic dynamite burgers, shakes, and more, served fresh and hot. 100% Halal certified.",
-    images: [{ url: "/Document.png" }],
+    images: [{ url: "/filbey-storefront.jpg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Filbey - A Little Crunch. A Lot of Comfort!",
     description:
       "Enjoy our signature fried chicken, classic dynamite burgers, shakes, and more, served fresh and hot. 100% Halal certified.",
-    images: ["/Document.png"],
+    images: ["/filbey-storefront.jpg"],
   },
 };
 
@@ -61,7 +61,7 @@ const restaurantJsonLd = {
   "@context": "https://schema.org",
   "@type": "Restaurant",
   name: "Filbey Fried Chicken & Burgers",
-  image: "https://thefilbey.com/Document.png",
+  image: "https://thefilbey.com/filbey-storefront.jpg",
   "@id": "https://thefilbey.com/",
   url: "https://thefilbey.com/",
   telephone: "+91 81223 56144",

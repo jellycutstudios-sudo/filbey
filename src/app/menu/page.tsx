@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: 'Dine-In Menu - Filbey Fried Chicken & Burgers',
     description:
       'Explore our full dine-in menu featuring 100% Halal chicken, dynamite wings, loaded fries, classic burgers, and signature shakes.',
-    images: [{ url: '/Document.png' }],
+    images: [{ url: '/filbey-storefront.jpg' }],
   },
 };
 
@@ -31,7 +31,7 @@ const menuJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Restaurant',
   name: 'Filbey Fried Chicken & Burgers',
-  image: 'https://thefilbey.com/Document.png',
+  image: 'https://thefilbey.com/filbey-storefront.jpg',
   '@id': 'https://thefilbey.com/',
   url: 'https://thefilbey.com/',
   telephone: '+91 81223 56144',
