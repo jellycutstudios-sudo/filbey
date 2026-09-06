@@ -188,22 +188,17 @@ export default function Home() {
           {/* Hero Content */}
           <div className="relative z-10 text-center px-4 md:px-8 max-w-3xl mx-auto flex flex-col items-center gap-4 py-12 md:py-16">
 
-            {/* Consolidated Premium Status & Rating Pill */}
-            <div className="inline-flex items-center gap-2.5 bg-black/40 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full text-xs text-white shadow-sm">
-              {mounted && restaurantStatus && (
-                <span className="flex items-center gap-1.5 font-semibold">
-                  <span className={`w-2 h-2 rounded-full ${restaurantStatus.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
-                  <span className={restaurantStatus.isOpen ? 'text-emerald-300' : 'text-rose-300'}>
-                    {restaurantStatus.label}
-                  </span>
+            {/* Clean Live Status Pill */}
+            {mounted && restaurantStatus && (
+              <div className="inline-flex items-center gap-2 bg-black/50 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-full text-xs text-white shadow-sm whitespace-nowrap">
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${restaurantStatus.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                <span className={`font-semibold ${restaurantStatus.isOpen ? 'text-emerald-300' : 'text-rose-300'}`}>
+                  {restaurantStatus.isOpen ? 'Open Now · Closes 11:30 PM' : restaurantStatus.label}
                 </span>
-              )}
-              <span className="text-white/30">•</span>
-              <span className="flex items-center gap-1 font-medium text-amber-300">
-                <span>★ 4.9</span>
-                <span className="text-white/80 font-normal">Perungudi, Chennai</span>
-              </span>
-            </div>
+                <span className="text-white/30">•</span>
+                <span className="text-white/80 font-normal">Perungudi</span>
+              </div>
+            )}
 
             {/* Headline - Clean 2 lines on mobile & desktop */}
             <h1 className="font-display font-extrabold tracking-tight text-white text-shadow-hero uppercase leading-[1.08] text-3xl sm:text-5xl md:text-7xl max-w-2xl mx-auto">
