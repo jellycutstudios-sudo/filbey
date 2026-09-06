@@ -296,19 +296,18 @@ export default function Home() {
         <section className="py-margin-desktop bg-surface px-margin-mobile md:px-margin-desktop overflow-hidden">
           <div className="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
             {/* Image Side */}
-            <div className="lg:col-span-5 relative h-[300px] md:h-[420px] rounded-[24px] overflow-hidden menu-card-shadow">
+            <div className="lg:col-span-6 relative aspect-[4/3] w-full rounded-[24px] overflow-hidden menu-card-shadow shadow-md">
               <Image
                 src="/filbey-storefront.jpg"
                 alt="Filbey Fried Chicken & Burgers Perungudi Storefront"
                 fill
-                sizes="(max-width: 1024px) 100vw, 41vw"
-                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </div>
 
             {/* Text Side */}
-            <div className="lg:col-span-7 flex flex-col items-start gap-stack-md lg:pl-6">
+            <div className="lg:col-span-6 flex flex-col items-start gap-stack-md lg:pl-6">
               <span className="bg-primary-fixed text-primary font-label-sm text-label-sm px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
                 {t('home.storyTag')}
               </span>

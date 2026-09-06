@@ -26,22 +26,25 @@ export default function AboutClient() {
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
           {/* Story Image Panel */}
-          <div className="lg:col-span-6 relative h-[350px] md:h-[500px] rounded-[24px] overflow-hidden menu-card-shadow">
-            <Image
-              src="/filbey-storefront.jpg"
-              alt="Filbey Fried Chicken & Burgers Perungudi Storefront"
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6 text-white">
-              <p className="font-display text-2xl uppercase tracking-wider text-secondary-container">
+          <div className="lg:col-span-6 flex flex-col gap-2">
+            <div className="relative aspect-[4/3] w-full rounded-[24px] overflow-hidden menu-card-shadow shadow-lg">
+              <Image
+                src="/filbey-storefront.jpg"
+                alt="Filbey Fried Chicken & Burgers Perungudi Storefront"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover object-center"
+                priority
+              />
+            </div>
+            <div className="flex items-center justify-between px-2 text-xs text-on-surface-variant font-medium">
+              <span className="flex items-center gap-1 text-primary font-bold">
+                <span className="material-symbols-outlined text-sm">storefront</span>
+                Perungudi, OMR — Chennai
+              </span>
+              <span className="text-secondary font-semibold font-display tracking-wide">
                 {t('about.sideQuoteTag')}
-              </p>
-              <p className="font-body-md text-sm mt-1 opacity-90">
-                {t('about.sideQuoteDesc')}
-              </p>
+              </span>
             </div>
           </div>
 
