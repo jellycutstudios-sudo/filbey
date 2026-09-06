@@ -23,6 +23,7 @@ export default function CartDrawer({ open, onClose, onProceed, meetsMinOrder, mi
     isFreeDelivery,
     amountNeededForFreeDelivery,
     discount,
+    gstAmount,
     isFirstOrderDiscountApplied,
     toggleFirstOrderDiscount,
   } = useCart();
@@ -197,6 +198,13 @@ export default function CartDrawer({ open, onClose, onProceed, meetsMinOrder, mi
                 ) : (
                   <span className="font-semibold text-on-surface">₹{effectiveDeliveryFee}</span>
                 )}
+              </div>
+              <div className="flex justify-between text-sm text-on-surface-variant">
+                <span className="flex items-center gap-1">
+                  GST
+                  <span className="text-[10px] bg-surface-container px-1.5 py-0.5 rounded-full text-on-surface-variant/70">5% CGST+SGST</span>
+                </span>
+                <span className="font-semibold text-on-surface">₹{gstAmount}</span>
               </div>
               {totalSavings > 0 && (
                 <div className="bg-green-50 border border-green-200/60 rounded-lg px-2.5 py-1 text-center text-[11px] text-green-800 font-medium my-0.5">

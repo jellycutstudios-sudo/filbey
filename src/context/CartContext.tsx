@@ -22,6 +22,7 @@ export interface DeliveryInfo {
 export const FREE_DELIVERY_THRESHOLD = 499;
 export const FIRST_ORDER_DISCOUNT_THRESHOLD = 399;
 export const FIRST_ORDER_DISCOUNT_AMOUNT = 30;
+export const GST_RATE = 0.05; // 5% GST (CGST 2.5% + SGST 2.5%)
 
 interface CartContextType {
   items: CartItem[];
@@ -42,6 +43,7 @@ interface CartContextType {
   setIsFirstOrderDiscountApplied: (applied: boolean) => void;
   toggleFirstOrderDiscount: () => void;
   discount: number;
+  gstAmount: number;
   total: number;
 }
 
@@ -134,7 +136,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isEligibleForFirstOrder = subtotal >= FIRST_ORDER_DISCOUNT_THRESHOLD;
   const discount = (isFirstOrderDiscountApplied && isEligibleForFirstOrder) ? FIRST_ORDER_DISCOUNT_AMOUNT : 0;
-  const total = Math.max(0, subtotal - discount + effectiveDeliveryFee);
+  const taxableAmount = Math.max(0, subtotal - discount);
+  const gstAmount = Math.round(taxableAmount * GST_RATE);
+  const total = Math.max(0, taxableAmount + gstAmount + effectiveDeliveryFee);
 
   return (
     <CartContext.Provider value={{
@@ -156,6 +160,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsFirstOrderDiscountApplied,
       toggleFirstOrderDiscount,
       discount,
+      gstAmount,
       total,
     }}>
       {children}

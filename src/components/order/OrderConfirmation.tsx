@@ -25,6 +25,7 @@ function buildWhatsAppMessage(
   effectiveDeliveryFee: number,
   isFreeDelivery: boolean,
   discount: number,
+  gstAmount: number,
   customer: CustomerDetails,
   locationName: string
 ): string {
@@ -41,6 +42,7 @@ function buildWhatsAppMessage(
     `💰 *Subtotal:* ₹${subtotal}` +
     discountStr + `\n` +
     `🚗 *Delivery:* ${deliveryStr}\n` +
+    `🧾 *GST (5%):* ₹${gstAmount}\n` +
     `✅ *Total to Pay:* ₹${total}\n\n` +
     `📍 *Delivery Address:*\n${customer.address}\n` +
     `🗺️ *Area:* ${locationName}\n\n` +
@@ -61,6 +63,7 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
     effectiveDeliveryFee,
     isFreeDelivery,
     discount,
+    gstAmount,
     clearCart,
   } = useCart();
   const locationName = deliveryInfo?.locationName ?? 'Your location';
@@ -74,6 +77,7 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
       effectiveDeliveryFee,
       isFreeDelivery,
       discount,
+      gstAmount,
       customer,
       locationName
     );
@@ -144,6 +148,13 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
             ) : (
               <span className="font-semibold text-on-surface">₹{effectiveDeliveryFee}</span>
             )}
+          </div>
+          <div className="flex justify-between text-sm text-on-surface-variant">
+            <span className="flex items-center gap-1">
+              GST
+              <span className="text-[10px] bg-surface-container px-1.5 py-0.5 rounded-full">(5% CGST+SGST)</span>
+            </span>
+            <span className="font-semibold text-on-surface">₹{gstAmount}</span>
           </div>
           {totalSavings > 0 && (
             <div className="bg-green-100/70 border border-green-200 text-green-800 text-xs px-3 py-1.5 rounded-lg text-center font-medium my-1">
