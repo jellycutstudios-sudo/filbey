@@ -48,20 +48,51 @@ const faqJsonLd = {
 };
 
 const TICKER_ITEMS_BASE = [
-  { icon: '🎉', text: '1st Order ₹30 OFF — Use on checkout' },
-  { icon: '🚗', text: 'Free Delivery on orders ₹399+' },
-  { icon: '🍗', text: '100% Halal Certified Chicken' },
-  { icon: '⭐', text: 'Loved by 500+ customers in OMR, Chennai' },
-  { icon: '💬', text: 'Quick orders via WhatsApp — +91 81223 56144' },
+  { icon: 'sell', text: '1st Order ₹30 OFF — Use on checkout' },
+  { icon: 'local_shipping', text: 'Free Delivery on orders ₹499+' },
+  { icon: 'verified', text: '100% Halal Certified Chicken' },
+  { icon: 'star', text: 'Loved by 500+ customers in OMR, Chennai' },
+  { icon: 'chat', text: 'Quick orders via WhatsApp — +91 81223 56144' },
 ];
 
 const PERKS = [
-  { icon: '🎁', title: '₹30 OFF', sub: 'First order' },
-  { icon: '🚗', title: 'Free Delivery', sub: 'On ₹399+' },
-  { icon: '✅', title: '100% Halal', sub: 'Certified' },
-  { icon: '🔥', title: 'Fresh & Hot', sub: 'Made to order' },
-  { icon: '⭐', title: '4.5★ Rating', sub: 'Google Reviews' },
-  { icon: '💬', title: 'WhatsApp', sub: 'Order by chat' },
+  {
+    icon: 'sell',
+    title: '₹30 OFF',
+    sub: 'First Direct Order',
+    badgeBg: 'bg-primary/10 text-primary border-primary/20',
+  },
+  {
+    icon: 'moped',
+    title: 'Free Delivery',
+    sub: 'On Orders ₹499+',
+    badgeBg: 'bg-emerald-600/10 text-emerald-700 border-emerald-600/20',
+  },
+  {
+    icon: 'verified',
+    title: '100% Halal',
+    sub: 'Certified Kitchen',
+    badgeBg: 'bg-amber-600/10 text-amber-800 border-amber-600/20',
+  },
+  {
+    icon: 'local_fire_department',
+    title: 'Fresh & Hot',
+    sub: 'Fried to Order',
+    badgeBg: 'bg-orange-500/10 text-orange-700 border-orange-500/20',
+  },
+  {
+    icon: 'star',
+    title: '4.5★ Rating',
+    sub: 'Google Reviews',
+    badgeBg: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
+  },
+  {
+    icon: 'chat',
+    title: 'WhatsApp',
+    sub: 'Order by Chat',
+    badgeBg: 'bg-[#25D366]/10 text-[#128C7E] border-[#25D366]/25',
+    isWhatsApp: true,
+  },
 ];
 
 export default function Home() {
@@ -111,8 +142,12 @@ export default function Home() {
 
   // Build ticker items — inject live status as the hours item
   const hoursTickerItem = mounted && restaurantStatus
-    ? { icon: restaurantStatus.isOpen ? '🟢' : '🔴', text: restaurantStatus.isOpen ? restaurantStatus.label : 'Closed · Opens at 11:30 AM' }
-    : { icon: '⏰', text: 'Open Daily 11:30 AM – 11:30 PM' };
+    ? {
+        icon: restaurantStatus.isOpen ? 'fiber_manual_record' : 'schedule',
+        text: restaurantStatus.isOpen ? restaurantStatus.label : 'Closed · Opens at 11:30 AM',
+        iconColor: restaurantStatus.isOpen ? 'text-emerald-400' : 'text-amber-300'
+      }
+    : { icon: 'schedule', text: 'Open Daily 11:30 AM – 11:30 PM', iconColor: 'text-white/80' };
   const TICKER_ITEMS = [...TICKER_ITEMS_BASE, hoursTickerItem];
   const tickerItems = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
@@ -132,7 +167,7 @@ export default function Home() {
               key={i}
               className="inline-flex items-center gap-1.5 text-white text-xs font-semibold px-6 tracking-wide shrink-0"
             >
-              <span>{item.icon}</span>
+              <span className={`material-symbols-outlined text-sm leading-none ${'iconColor' in item ? item.iconColor : 'text-white/90'}`}>{item.icon}</span>
               <span>{item.text}</span>
               <span className="mx-4 text-white/40 text-base leading-none">•</span>
             </span>
@@ -213,13 +248,19 @@ export default function Home() {
               </p>
               {mounted && isFirstOrder ? (
                 <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 via-primary-container/40 to-amber-500/20 backdrop-blur-md border border-amber-300/40 text-amber-100 text-xs sm:text-sm px-4 py-1.5 rounded-full font-semibold shadow-sm">
-                  <span>🎁 ₹30 OFF First Direct Order</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-sm">sell</span>
+                    ₹30 OFF First Direct Order
+                  </span>
                   <span className="text-white/30">•</span>
                   <span>Free Delivery ₹499+</span>
                 </div>
               ) : (
                 <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs sm:text-sm px-4 py-1.5 rounded-full font-medium shadow-sm">
-                  <span>🚗 Free Delivery on orders ₹499+</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-sm">local_shipping</span>
+                    Free Delivery on orders ₹499+
+                  </span>
                 </div>
               )}
             </div>
@@ -262,33 +303,52 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Perks Horizontal Strip ── */}
-        <section className="bg-surface-container-low py-5 px-4 md:px-8 overflow-hidden">
-          {/* Mobile: horizontal scroll */}
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 md:hidden">
-            {PERKS.map((perk) => (
-              <div
-                key={perk.title}
-                className="perk-chip flex-shrink-0 flex flex-col items-center gap-1 bg-surface rounded-2xl px-4 py-3 shadow-sm border border-surface-container-high min-w-[84px]"
-              >
-                <span className="text-2xl leading-none">{perk.icon}</span>
-                <span className="font-bold text-primary text-xs text-center leading-tight">{perk.title}</span>
-                <span className="text-on-surface-variant text-[10px] text-center leading-tight">{perk.sub}</span>
-              </div>
-            ))}
-          </div>
-          {/* Desktop: grid */}
-          <div className="hidden md:grid grid-cols-6 gap-4 max-w-container-max mx-auto">
-            {PERKS.map((perk) => (
-              <div
-                key={perk.title}
-                className="perk-chip flex flex-col items-center gap-1.5 bg-surface rounded-2xl px-3 py-4 shadow-sm border border-surface-container-high text-center"
-              >
-                <span className="text-3xl leading-none">{perk.icon}</span>
-                <span className="font-bold text-primary text-sm leading-tight">{perk.title}</span>
-                <span className="text-on-surface-variant text-xs leading-tight">{perk.sub}</span>
-              </div>
-            ))}
+        {/* ── Perks Strip (Refined Flat Icons, No Emojis) ── */}
+        <section className="bg-gradient-to-b from-surface via-surface-container-lowest to-surface-container-low py-7 px-4 md:px-8 border-y border-surface-variant/20">
+          <div className="max-w-container-max mx-auto">
+            {/* Mobile: horizontal scroll with subtle snap */}
+            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 md:hidden scroll-smooth -mx-4 px-4">
+              {PERKS.map((perk) => (
+                <div
+                  key={perk.title}
+                  className="flex-shrink-0 flex flex-col items-center text-center bg-white rounded-2xl p-4 shadow-2xs border border-surface-variant/25 min-w-[124px]"
+                >
+                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-2.5 border ${perk.badgeBg}`}>
+                    {perk.isWhatsApp ? (
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.303-.058.116-.087.188-.173.289l-.26.303c-.087.087-.177.182-.076.355.101.173.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.072.043.419-.101.824z"/>
+                      </svg>
+                    ) : (
+                      <span className="material-symbols-outlined text-xl">{perk.icon}</span>
+                    )}
+                  </div>
+                  <span className="font-extrabold text-on-surface text-xs leading-tight">{perk.title}</span>
+                  <span className="text-on-surface-variant/70 text-[10px] font-medium leading-tight mt-0.5">{perk.sub}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: 6-column grid with premium hover micro-interactions */}
+            <div className="hidden md:grid grid-cols-6 gap-3.5">
+              {PERKS.map((perk) => (
+                <div
+                  key={perk.title}
+                  className="group flex flex-col items-center text-center bg-white hover:bg-white rounded-2xl p-4 shadow-2xs hover:shadow-md border border-surface-variant/25 hover:border-primary/25 transition-all duration-300 hover:-translate-y-1 cursor-default"
+                >
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 border transition-transform duration-300 group-hover:scale-110 ${perk.badgeBg}`}>
+                    {perk.isWhatsApp ? (
+                      <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.303-.058.116-.087.188-.173.289l-.26.303c-.087.087-.177.182-.076.355.101.173.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.072.043.419-.101.824z"/>
+                      </svg>
+                    ) : (
+                      <span className="material-symbols-outlined text-2xl">{perk.icon}</span>
+                    )}
+                  </div>
+                  <span className="font-extrabold text-on-surface text-sm leading-tight group-hover:text-primary transition-colors">{perk.title}</span>
+                  <span className="text-on-surface-variant/70 text-xs font-medium leading-tight mt-1">{perk.sub}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 

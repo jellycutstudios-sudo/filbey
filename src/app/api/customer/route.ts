@@ -35,7 +35,12 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json();
-    return NextResponse.json({ hasOrdered: Boolean(data.hasOrdered), phone: cleanPhone });
+    return NextResponse.json({
+      hasOrdered: Boolean(data.hasOrdered),
+      phone: cleanPhone,
+      name: data.name || '',
+      address: data.address || '',
+    });
   } catch (err) {
     console.warn('[API /api/customer GET error]:', err);
     return NextResponse.json({ hasOrdered: false, error: 'Webhook timeout or error' });

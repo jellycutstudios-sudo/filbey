@@ -40,6 +40,7 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
   const [gpsLoading, setGpsLoading] = useState(false);
   const [isCheckingPhone, setIsCheckingPhone] = useState(false);
   const [phoneCheckStatus, setPhoneCheckStatus] = useState<'idle' | 'checking' | 'repeat' | 'first-time'>('idle');
+  const [detectedName, setDetectedName] = useState<string>('');
 
   // Check phone whenever valid 10-digit number is present
   useEffect(() => {
@@ -55,7 +56,19 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
       try {
         const res = await checkPhoneEligibility(raw);
         if (!isCancelled) {
-          setPhoneCheckStatus(res.hasOrdered ? 'repeat' : 'first-time');
+          if (res.hasOrdered) {
+            setPhoneCheckStatus('repeat');
+            const foundName = res.name || form.name || '';
+            setDetectedName(foundName);
+            // Autofill name or address if available and field is empty
+            setForm(prev => ({
+              ...prev,
+              name: prev.name.trim() ? prev.name : (res.name || ''),
+              address: prev.address.trim() ? prev.address : (res.address || ''),
+            }));
+          } else {
+            setPhoneCheckStatus('first-time');
+          }
         }
       } catch {
         if (!isCancelled) setPhoneCheckStatus('idle');
@@ -224,22 +237,26 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
           ) : isCheckingPhone ? (
             <div className="flex items-center gap-1.5 text-xs text-primary/80 pl-1 mt-1">
               <span className="material-symbols-outlined text-sm animate-spin">sync</span>
-              <span>Checking offer eligibility…</span>
+              <span>Checking details…</span>
             </div>
           ) : phoneCheckStatus === 'repeat' || !isPhoneEligibleForFirstOrder ? (
-            <div className="mt-1.5 p-3 bg-amber-50 border border-amber-300 rounded-xl flex items-start gap-2.5 text-xs text-amber-900">
-              <span className="material-symbols-outlined text-amber-700 text-base shrink-0 mt-0.5">info</span>
-              <div>
-                <p className="font-bold text-amber-900">Welcome back!</p>
-                <p className="text-amber-800 text-[11px] leading-relaxed mt-0.5">
-                  This phone number has ordered with Filbey before. The <strong>₹30 first-time offer has been removed</strong> from this order.
+            <div className="mt-2 p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-2xl flex items-center gap-3 animate-in fade-in">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600/10 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                <span className="material-symbols-outlined text-2xl">waving_hand</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-extrabold text-emerald-950 text-xs sm:text-sm leading-tight truncate">
+                  Welcome back{detectedName || form.name ? `, ${detectedName || form.name}` : ''}!
+                </p>
+                <p className="text-[11px] text-emerald-800/80 font-medium leading-tight mt-0.5">
+                  Great to see you again. Direct kitchen pricing applied.
                 </p>
               </div>
             </div>
           ) : phoneCheckStatus === 'first-time' ? (
-            <div className="mt-1.5 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-xs text-emerald-800 font-medium">
-              <span className="material-symbols-outlined text-emerald-600 text-base shrink-0">verified</span>
-              <span>🎉 1st direct order! <strong>₹30 discount applied</strong>.</span>
+            <div className="mt-2 px-3.5 py-2.5 bg-emerald-50 border border-emerald-200/80 rounded-2xl flex items-center gap-2 text-xs text-emerald-900 font-medium animate-in fade-in">
+              <span className="material-symbols-outlined text-emerald-700 text-base shrink-0">verified</span>
+              <span>First direct order! ₹30 discount applied on your bill.</span>
             </div>
           ) : (
             <p className="text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5 ml-1">

@@ -68,19 +68,28 @@ function doGet(e) {
     }
 
     const data = sheet.getDataRange().getValues();
-    // Search Column B (index 1) for this phone number (skipping header row)
     let found = false;
+    let customerName = "";
+    let customerAddress = "";
+
+    // Search Column B (index 1) for this phone number (skipping header row 0)
+    // Going from row 1 to bottom ensures we get their latest name and address
     for (let i = 1; i < data.length; i++) {
       const cellPhone = String(data[i][1] || "").replace(/\D/g, "");
       const normalized = cellPhone.length >= 10 ? cellPhone.slice(-10) : cellPhone;
       if (normalized === cleanQuery) {
         found = true;
-        break;
+        if (data[i][2]) customerName = String(data[i][2]).trim();
+        if (data[i][4]) customerAddress = String(data[i][4]).trim();
       }
     }
 
-    return ContentService.createTextOutput(JSON.stringify({ hasOrdered: found, phone: cleanQuery }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({
+      hasOrdered: found,
+      phone: cleanQuery,
+      name: customerName,
+      address: customerAddress
+    })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ hasOrdered: false, error: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
@@ -97,16 +106,15 @@ function doGet(e) {
    - **Description:** `Filbey Order Webhook`
    - **Execute as:** `Me`
    - **Who has access:** `Anyone` *(Crucial so the website can log orders and check phones)*
-4. Click **Deploy**.
-5. Copy the **Web App URL** (it looks like: `https://script.google.com/macros/s/AKfycb.../exec`).
-
 ---
 
-## Step 4: Add to Website Configuration
-In your website root, open or create `.env.local` and add:
+## ⚡ How to Update the Script (If Already Deployed)
+If you already deployed your script previously:
+1. In Apps Script, replace the code with the script above and click **Save** (💾).
+2. In the top right, click **Deploy** > **Manage deployments**.
+3. Click the **Edit (pencil icon ✏️)** in the top right of the modal.
+4. Under **Version**, click the dropdown and choose **New version**.
+5. Click **Deploy**. *(Your URL stays the same, and it immediately starts returning the customer name & address!)*
 
-```env
-GOOGLE_SHEET_WEBHOOK_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec"
-```
 
 *Note: The website also has an automatic local backup. Even if you haven't added the URL yet, it will still remember phones on the customer's browser.*

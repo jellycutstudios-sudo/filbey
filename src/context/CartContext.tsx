@@ -45,8 +45,8 @@ interface CartContextType {
   isPhoneEligibleForFirstOrder: boolean;
   setIsPhoneEligibleForFirstOrder: (eligible: boolean) => void;
   verifiedPhone: string | null;
-  checkPhoneEligibility: (phone: string) => Promise<{ hasOrdered: boolean }>;
-  recordOrderedPhone: (phone: string) => void;
+  checkPhoneEligibility: (phone: string) => Promise<{ hasOrdered: boolean; name?: string; address?: string }>;
+  recordOrderedPhone: (phone: string, name?: string, address?: string) => void;
   discount: number;
   gstAmount: number;
   total: number;
@@ -133,20 +133,37 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsFirstOrderDiscountApplied(prev => !prev);
   }, []);
 
-  const checkPhoneEligibility = useCallback(async (phone: string): Promise<{ hasOrdered: boolean }> => {
+  const checkPhoneEligibility = useCallback(async (phone: string): Promise<{ hasOrdered: boolean; name?: string; address?: string }> => {
     const cleanPhone = phone.replace(/\D/g, '').slice(-10);
     if (!cleanPhone || cleanPhone.length !== 10) {
       return { hasOrdered: false };
     }
 
-    // 1. Check local device cache for instant response
+    let savedName = '';
+    let savedAddress = '';
+
+    // 1. Check local customer phone map
     try {
-      const stored = localStorage.getItem('filbey_ordered_phones');
-      const list: string[] = stored ? JSON.parse(stored) : [];
-      if (list.includes(cleanPhone)) {
+      const stored = localStorage.getItem('filbey_customers_by_phone');
+      const map = stored ? JSON.parse(stored) : {};
+      if (map[cleanPhone]) {
+        savedName = map[cleanPhone].name || '';
+        savedAddress = map[cleanPhone].address || '';
         setIsPhoneEligibleForFirstOrder(false);
         setVerifiedPhone(cleanPhone);
-        return { hasOrdered: true };
+        return { hasOrdered: true, name: savedName, address: savedAddress };
+      }
+    } catch { /* ignore */ }
+
+    // Check last saved local customer profile
+    try {
+      const profile = localStorage.getItem('filbey_customer');
+      if (profile) {
+        const parsed = JSON.parse(profile);
+        if (parsed.phone && parsed.phone.replace(/\D/g, '').slice(-10) === cleanPhone) {
+          savedName = parsed.name || '';
+          savedAddress = parsed.address || '';
+        }
       }
     } catch { /* ignore */ }
 
@@ -158,15 +175,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (data.hasOrdered) {
           setIsPhoneEligibleForFirstOrder(false);
           setVerifiedPhone(cleanPhone);
+          const finalName = data.name || savedName;
+          const finalAddress = data.address || savedAddress;
           try {
-            const stored = localStorage.getItem('filbey_ordered_phones');
-            const list: string[] = stored ? JSON.parse(stored) : [];
-            if (!list.includes(cleanPhone)) {
-              list.push(cleanPhone);
-              localStorage.setItem('filbey_ordered_phones', JSON.stringify(list));
-            }
+            const stored = localStorage.getItem('filbey_customers_by_phone');
+            const map = stored ? JSON.parse(stored) : {};
+            map[cleanPhone] = { name: finalName, address: finalAddress };
+            localStorage.setItem('filbey_customers_by_phone', JSON.stringify(map));
           } catch { /* ignore */ }
-          return { hasOrdered: true };
+          return { hasOrdered: true, name: finalName, address: finalAddress };
         }
       }
     } catch (err) {
@@ -178,15 +195,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { hasOrdered: false };
   }, []);
 
-  const recordOrderedPhone = useCallback((phone: string) => {
+  const recordOrderedPhone = useCallback((phone: string, name?: string, address?: string) => {
     const cleanPhone = phone.replace(/\D/g, '').slice(-10);
     if (!cleanPhone || cleanPhone.length !== 10) return;
     try {
-      const stored = localStorage.getItem('filbey_ordered_phones');
-      const list: string[] = stored ? JSON.parse(stored) : [];
-      if (!list.includes(cleanPhone)) {
-        list.push(cleanPhone);
-        localStorage.setItem('filbey_ordered_phones', JSON.stringify(list));
+      const stored = localStorage.getItem('filbey_customers_by_phone');
+      const map = stored ? JSON.parse(stored) : {};
+      map[cleanPhone] = { name: name || '', address: address || '' };
+      localStorage.setItem('filbey_customers_by_phone', JSON.stringify(map));
+
+      const oldListRaw = localStorage.getItem('filbey_ordered_phones');
+      const oldList: string[] = oldListRaw ? JSON.parse(oldListRaw) : [];
+      if (!oldList.includes(cleanPhone)) {
+        oldList.push(cleanPhone);
+        localStorage.setItem('filbey_ordered_phones', JSON.stringify(oldList));
       }
       localStorage.setItem('filbey_has_ordered', 'true');
     } catch { /* ignore */ }

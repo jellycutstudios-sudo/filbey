@@ -85,7 +85,7 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
     window.open(url, '_blank', 'noopener,noreferrer');
 
     // Record phone number so repeat orders from this number detect it
-    recordOrderedPhone(customer.phone);
+    recordOrderedPhone(customer.phone, customer.name, customer.address);
 
     // Save customer details to Google Sheet for promotions & record keeping
     const itemsSummary = items
