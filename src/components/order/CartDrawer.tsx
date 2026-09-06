@@ -26,6 +26,7 @@ export default function CartDrawer({ open, onClose, onProceed, meetsMinOrder, mi
     gstAmount,
     isFirstOrderDiscountApplied,
     toggleFirstOrderDiscount,
+    isPhoneEligibleForFirstOrder,
   } = useCart();
 
   // Lock body scroll when open
@@ -146,33 +147,50 @@ export default function CartDrawer({ open, onClose, onProceed, meetsMinOrder, mi
             )}
 
             {/* First order discount toggle */}
-            <div className="bg-surface-container-low rounded-xl p-3 mb-3 border border-surface-variant/20">
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-xs font-semibold text-on-surface cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={isFirstOrderDiscountApplied}
-                    onChange={toggleFirstOrderDiscount}
-                    className="rounded text-primary focus:ring-primary w-4 h-4 accent-primary"
-                  />
-                  <span>🎁 1st Direct Order Discount (₹30 OFF)</span>
-                </label>
-                {subtotal >= 399 ? (
-                  <span className="text-green-700 font-bold text-xs bg-green-100 px-2 py-0.5 rounded-full">
-                    -₹30
+            {!isPhoneEligibleForFirstOrder ? (
+              <div className="bg-amber-50/70 rounded-xl p-3 mb-3 border border-amber-200">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs text-amber-900 font-medium">
+                    <span className="material-symbols-outlined text-sm text-amber-700">info</span>
+                    <span>1st Order Offer (₹30 OFF)</span>
                   </span>
-                ) : (
-                  <span className="text-[10px] text-on-surface-variant">
-                    Min ₹399
+                  <span className="text-[10px] text-amber-800 bg-amber-100 font-semibold px-2 py-0.5 rounded-full">
+                    Already Claimed
                   </span>
+                </div>
+                <p className="text-[11px] text-amber-800/80 mt-1 pl-5">
+                  This phone number has already redeemed the 1st order discount.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-surface-container-low rounded-xl p-3 mb-3 border border-surface-variant/20">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-on-surface cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={isFirstOrderDiscountApplied}
+                      onChange={toggleFirstOrderDiscount}
+                      className="rounded text-primary focus:ring-primary w-4 h-4 accent-primary"
+                    />
+                    <span>🎁 1st Direct Order Discount (₹30 OFF)</span>
+                  </label>
+                  {subtotal >= 399 ? (
+                    <span className="text-green-700 font-bold text-xs bg-green-100 px-2 py-0.5 rounded-full">
+                      -₹30
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-on-surface-variant">
+                      Min ₹399
+                    </span>
+                  )}
+                </div>
+                {subtotal < 399 && (
+                  <p className="text-[11px] text-on-surface-variant/80 mt-1 pl-6">
+                    Add ₹{399 - subtotal} more to unlock this discount!
+                  </p>
                 )}
               </div>
-              {subtotal < 399 && (
-                <p className="text-[11px] text-on-surface-variant/80 mt-1 pl-6">
-                  Add ₹{399 - subtotal} more to unlock this discount!
-                </p>
-              )}
-            </div>
+            )}
 
             {/* Bill breakdown */}
             <div className="flex flex-col gap-1.5 mb-3">

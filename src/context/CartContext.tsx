@@ -42,6 +42,11 @@ interface CartContextType {
   isFirstOrderDiscountApplied: boolean;
   setIsFirstOrderDiscountApplied: (applied: boolean) => void;
   toggleFirstOrderDiscount: () => void;
+  isPhoneEligibleForFirstOrder: boolean;
+  setIsPhoneEligibleForFirstOrder: (eligible: boolean) => void;
+  verifiedPhone: string | null;
+  checkPhoneEligibility: (phone: string) => Promise<{ hasOrdered: boolean }>;
+  recordOrderedPhone: (phone: string) => void;
   discount: number;
   gstAmount: number;
   total: number;
@@ -77,6 +82,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return true;
     }
   });
+  const [isPhoneEligibleForFirstOrder, setIsPhoneEligibleForFirstOrder] = useState<boolean>(true);
+  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
 
   // Persist items
   useEffect(() => {
@@ -126,6 +133,66 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsFirstOrderDiscountApplied(prev => !prev);
   }, []);
 
+  const checkPhoneEligibility = useCallback(async (phone: string): Promise<{ hasOrdered: boolean }> => {
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      return { hasOrdered: false };
+    }
+
+    // 1. Check local device cache for instant response
+    try {
+      const stored = localStorage.getItem('filbey_ordered_phones');
+      const list: string[] = stored ? JSON.parse(stored) : [];
+      if (list.includes(cleanPhone)) {
+        setIsPhoneEligibleForFirstOrder(false);
+        setVerifiedPhone(cleanPhone);
+        return { hasOrdered: true };
+      }
+    } catch { /* ignore */ }
+
+    // 2. Check backend API (Google Sheets)
+    try {
+      const res = await fetch(`/api/customer?phone=${encodeURIComponent(cleanPhone)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.hasOrdered) {
+          setIsPhoneEligibleForFirstOrder(false);
+          setVerifiedPhone(cleanPhone);
+          try {
+            const stored = localStorage.getItem('filbey_ordered_phones');
+            const list: string[] = stored ? JSON.parse(stored) : [];
+            if (!list.includes(cleanPhone)) {
+              list.push(cleanPhone);
+              localStorage.setItem('filbey_ordered_phones', JSON.stringify(list));
+            }
+          } catch { /* ignore */ }
+          return { hasOrdered: true };
+        }
+      }
+    } catch (err) {
+      console.warn('Error checking phone eligibility:', err);
+    }
+
+    setIsPhoneEligibleForFirstOrder(true);
+    setVerifiedPhone(cleanPhone);
+    return { hasOrdered: false };
+  }, []);
+
+  const recordOrderedPhone = useCallback((phone: string) => {
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+    if (!cleanPhone || cleanPhone.length !== 10) return;
+    try {
+      const stored = localStorage.getItem('filbey_ordered_phones');
+      const list: string[] = stored ? JSON.parse(stored) : [];
+      if (!list.includes(cleanPhone)) {
+        list.push(cleanPhone);
+        localStorage.setItem('filbey_ordered_phones', JSON.stringify(list));
+      }
+      localStorage.setItem('filbey_has_ordered', 'true');
+    } catch { /* ignore */ }
+    setIsPhoneEligibleForFirstOrder(false);
+  }, []);
+
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
@@ -134,7 +201,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const effectiveDeliveryFee = isFreeDelivery ? 0 : baseDeliveryFee;
   const amountNeededForFreeDelivery = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
 
-  const isEligibleForFirstOrder = subtotal >= FIRST_ORDER_DISCOUNT_THRESHOLD;
+  // ₹30 discount requires: subtotal >= 399, checkbox checked, AND phone is a first-time customer
+  const isEligibleForFirstOrder = subtotal >= FIRST_ORDER_DISCOUNT_THRESHOLD && isPhoneEligibleForFirstOrder;
   const discount = (isFirstOrderDiscountApplied && isEligibleForFirstOrder) ? FIRST_ORDER_DISCOUNT_AMOUNT : 0;
   const taxableAmount = Math.max(0, subtotal - discount);
   const gstAmount = Math.round(taxableAmount * GST_RATE);
@@ -159,6 +227,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isFirstOrderDiscountApplied,
       setIsFirstOrderDiscountApplied,
       toggleFirstOrderDiscount,
+      isPhoneEligibleForFirstOrder,
+      setIsPhoneEligibleForFirstOrder,
+      verifiedPhone,
+      checkPhoneEligibility,
+      recordOrderedPhone,
       discount,
       gstAmount,
       total,

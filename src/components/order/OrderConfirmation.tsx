@@ -64,6 +64,7 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
     discount,
     gstAmount,
     clearCart,
+    recordOrderedPhone,
   } = useCart();
   const locationName = deliveryInfo?.locationName ?? 'Your location';
 
@@ -82,9 +83,28 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
     );
     const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
-    try {
-      localStorage.setItem('filbey_has_ordered', 'true');
-    } catch { /* ignore */ }
+
+    // Record phone number so repeat orders from this number detect it
+    recordOrderedPhone(customer.phone);
+
+    // Save customer details to Google Sheet for promotions & record keeping
+    const itemsSummary = items
+      .map(i => `${i.quantity}x ${i.name}${i.priceLabel ? ` (${i.priceLabel})` : ''}`)
+      .join(', ');
+
+    fetch('/api/customer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.address,
+        area: locationName,
+        total,
+        items: itemsSummary,
+      }),
+    }).catch(err => console.warn('Could not sync order to Google Sheet:', err));
+
     clearCart();
     onOrderPlaced();
   };

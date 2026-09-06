@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useCart } from '@/context/CartContext';
 
 export interface CustomerDetails {
   name: string;
@@ -18,6 +19,7 @@ interface CustomerDetailsFormProps {
 }
 
 export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetailsFormProps) {
+  const { checkPhoneEligibility, isPhoneEligibleForFirstOrder } = useCart();
   const [form, setForm] = useState<CustomerDetails>(() => {
     if (typeof window === 'undefined') return { name: '', phone: '', address: '', notes: '' };
     try {
@@ -36,6 +38,37 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
   });
   const [errors, setErrors] = useState<Partial<CustomerDetails>>({});
   const [gpsLoading, setGpsLoading] = useState(false);
+  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
+  const [phoneCheckStatus, setPhoneCheckStatus] = useState<'idle' | 'checking' | 'repeat' | 'first-time'>('idle');
+
+  // Check phone whenever valid 10-digit number is present
+  useEffect(() => {
+    const raw = form.phone.trim();
+    if (!/^[6-9]\d{9}$/.test(raw)) {
+      return;
+    }
+
+    let isCancelled = false;
+    const timer = setTimeout(async () => {
+      setIsCheckingPhone(true);
+      setPhoneCheckStatus('checking');
+      try {
+        const res = await checkPhoneEligibility(raw);
+        if (!isCancelled) {
+          setPhoneCheckStatus(res.hasOrdered ? 'repeat' : 'first-time');
+        }
+      } catch {
+        if (!isCancelled) setPhoneCheckStatus('idle');
+      } finally {
+        if (!isCancelled) setIsCheckingPhone(false);
+      }
+    }, 400);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
+  }, [form.phone, checkPhoneEligibility]);
 
   const set = (field: keyof CustomerDetails) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm(prev => ({ ...prev, [field]: e.target.value }));
@@ -188,6 +221,26 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
           </div>
           {errors.phone ? (
             <p className="text-xs text-error ml-1">{errors.phone}</p>
+          ) : isCheckingPhone ? (
+            <div className="flex items-center gap-1.5 text-xs text-primary/80 pl-1 mt-1">
+              <span className="material-symbols-outlined text-sm animate-spin">sync</span>
+              <span>Checking offer eligibility…</span>
+            </div>
+          ) : phoneCheckStatus === 'repeat' || !isPhoneEligibleForFirstOrder ? (
+            <div className="mt-1.5 p-3 bg-amber-50 border border-amber-300 rounded-xl flex items-start gap-2.5 text-xs text-amber-900">
+              <span className="material-symbols-outlined text-amber-700 text-base shrink-0 mt-0.5">info</span>
+              <div>
+                <p className="font-bold text-amber-900">Welcome back!</p>
+                <p className="text-amber-800 text-[11px] leading-relaxed mt-0.5">
+                  This phone number has ordered with Filbey before. The <strong>₹30 first-time offer has been removed</strong> from this order.
+                </p>
+              </div>
+            </div>
+          ) : phoneCheckStatus === 'first-time' ? (
+            <div className="mt-1.5 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-xs text-emerald-800 font-medium">
+              <span className="material-symbols-outlined text-emerald-600 text-base shrink-0">verified</span>
+              <span>🎉 1st direct order! <strong>₹30 discount applied</strong>.</span>
+            </div>
           ) : (
             <p className="text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5 ml-1">
               <span className="material-symbols-outlined text-xs text-green-700">chat</span>
