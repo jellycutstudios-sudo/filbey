@@ -207,7 +207,7 @@ export default function Home() {
             </div>
 
             {/* Headline */}
-            <h1 className="font-display text-white text-shadow-hero uppercase leading-tight text-5xl md:text-7xl">
+            <h1 className="font-display font-extrabold tracking-tight text-white text-shadow-hero uppercase leading-tight text-5xl md:text-7xl">
               {t('home.heroTitle1')}<br />
               <span className="text-secondary-fixed-dim">{t('home.heroTitle2')}</span>
             </h1>

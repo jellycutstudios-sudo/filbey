@@ -77,24 +77,27 @@ const config: Config = {
                 "stack-sm": "4px"
             },
             "fontFamily": {
-                "headline-md": ["var(--font-anton)", "sans-serif"],
-                "label-sm": ["var(--font-inter)", "sans-serif"],
-                "body-lg": ["var(--font-inter)", "sans-serif"],
-                "label-lg": ["var(--font-inter)", "sans-serif"],
-                "body-md": ["var(--font-inter)", "sans-serif"],
-                "headline-lg-mobile": ["var(--font-anton)", "sans-serif"],
-                "display": ["var(--font-anton)", "sans-serif"],
-                "headline-lg": ["var(--font-anton)", "sans-serif"]
+                "headline-md": ["var(--font-bricolage)", "sans-serif"],
+                "label-sm": ["var(--font-outfit)", "sans-serif"],
+                "body-lg": ["var(--font-outfit)", "sans-serif"],
+                "label-lg": ["var(--font-outfit)", "sans-serif"],
+                "body-md": ["var(--font-outfit)", "sans-serif"],
+                "headline-lg-mobile": ["var(--font-bricolage)", "sans-serif"],
+                "display": ["var(--font-bricolage)", "sans-serif"],
+                "headline-lg": ["var(--font-bricolage)", "sans-serif"],
+                "bricolage": ["var(--font-bricolage)", "sans-serif"],
+                "outfit": ["var(--font-outfit)", "sans-serif"],
+                "sans": ["var(--font-outfit)", "sans-serif"]
             },
             "fontSize": {
-                "headline-md": ["24px", { "lineHeight": "28px", "fontWeight": "400" }],
+                "headline-md": ["24px", { "lineHeight": "28px", "fontWeight": "700" }],
                 "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
                 "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
-                "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.03em", "fontWeight": "700" }],
                 "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
-                "headline-lg-mobile": ["32px", { "lineHeight": "36px", "fontWeight": "400" }],
-                "display": ["64px", { "lineHeight": "72px", "letterSpacing": "0.02em", "fontWeight": "400" }],
-                "headline-lg": ["48px", { "lineHeight": "52px", "fontWeight": "400" }]
+                "headline-lg-mobile": ["32px", { "lineHeight": "36px", "fontWeight": "800" }],
+                "display": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.01em", "fontWeight": "800" }],
+                "headline-lg": ["48px", { "lineHeight": "52px", "fontWeight": "800" }]
             }
         }
     },

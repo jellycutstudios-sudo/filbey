@@ -65,14 +65,14 @@
   --spacing-gutter: 24px;
   --spacing-stack-sm: 4px;
 
-  --font-headline-md: "Anton", sans-serif;
-  --font-label-sm: "Inter", sans-serif;
-  --font-body-lg: "Inter", sans-serif;
-  --font-label-lg: "Inter", sans-serif;
-  --font-body-md: "Inter", sans-serif;
-  --font-headline-lg-mobile: "Anton", sans-serif;
-  --font-display: "Anton", sans-serif;
-  --font-headline-lg: "Anton", sans-serif;
+  --font-headline-md: var(--font-bricolage), sans-serif;
+  --font-label-sm: var(--font-outfit), sans-serif;
+  --font-body-lg: var(--font-outfit), sans-serif;
+  --font-label-lg: var(--font-outfit), sans-serif;
+  --font-body-md: var(--font-outfit), sans-serif;
+  --font-headline-lg-mobile: var(--font-bricolage), sans-serif;
+  --font-display: var(--font-bricolage), sans-serif;
+  --font-headline-lg: var(--font-bricolage), sans-serif;
 
   --text-headline-md: 24px;
   --text-headline-md--line-height: 28px;
@@ -95,6 +95,10 @@
   --text-display--letter-spacing: 0.02em;
   --text-headline-lg: 48px;
   --text-headline-lg--line-height: 52px;
+}
+
+body {
+  font-family: var(--font-outfit), sans-serif;
 }
 
 @layer utilities {

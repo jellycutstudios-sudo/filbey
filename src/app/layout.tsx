@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
-import { Anton, Inter, Baloo_Thambi_2 } from "next/font/google";
+import { Bricolage_Grotesque, Outfit, Baloo_Thambi_2 } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { CartProvider } from "@/context/CartContext";
 
-const anton = Anton({
-  weight: "400",
+const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-anton",
+  variable: "--font-bricolage",
   display: "swap",
 });
 
-const inter = Inter({
+const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-outfit",
   display: "swap",
 });
 
@@ -103,7 +102,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${anton.variable} ${inter.variable} ${balooThambi2.variable} light`}>
+    <html lang="en" className={`${bricolageGrotesque.variable} ${outfit.variable} ${balooThambi2.variable} light`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
