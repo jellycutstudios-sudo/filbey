@@ -45,7 +45,7 @@ interface CartContextType {
   isPhoneEligibleForFirstOrder: boolean;
   setIsPhoneEligibleForFirstOrder: (eligible: boolean) => void;
   verifiedPhone: string | null;
-  checkPhoneEligibility: (phone: string) => Promise<{ hasOrdered: boolean; name?: string; address?: string }>;
+  checkPhoneEligibility: (phone: string) => Promise<{ hasOrdered: boolean; name?: string; address?: string; buildingDetails?: string; landmark?: string }>;
   recordOrderedPhone: (phone: string, name?: string, address?: string) => void;
   discount: number;
   gstAmount: number;
@@ -133,7 +133,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsFirstOrderDiscountApplied(prev => !prev);
   }, []);
 
-  const checkPhoneEligibility = useCallback(async (phone: string): Promise<{ hasOrdered: boolean; name?: string; address?: string }> => {
+  const checkPhoneEligibility = useCallback(async (phone: string): Promise<{ hasOrdered: boolean; name?: string; address?: string; buildingDetails?: string; landmark?: string }> => {
     const cleanPhone = phone.replace(/\D/g, '').slice(-10);
     if (!cleanPhone || cleanPhone.length !== 10) {
       return { hasOrdered: false };

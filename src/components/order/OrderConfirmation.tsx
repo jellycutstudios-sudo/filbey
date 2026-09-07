@@ -43,6 +43,8 @@ function buildWhatsAppMessage(
     `🧾 *GST on Food (5%):* ₹${gstAmount}\n` +
     `✅ *Total to Pay:* ₹${total}\n\n` +
     `📍 *Delivery Address:*\n${customer.address}\n` +
+    (customer.buildingDetails ? `🏢 *Flat / Floor / Building:* ${customer.buildingDetails}\n` : '') +
+    (customer.landmark ? `🚪 *Gate / Landmark:* ${customer.landmark}\n` : '') +
     `🗺️ *Google Maps Pin:* ${mapsLink}\n` +
     `🏙️ *Area:* ${locationName}\n\n` +
     `👤 *Name:* ${customer.name}\n` +
@@ -99,6 +101,8 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
         name: customer.name,
         phone: customer.phone,
         address: customer.address,
+        buildingDetails: customer.buildingDetails || '',
+        landmark: customer.landmark || '',
         area: locationName,
         total,
         items: itemsSummary,
@@ -205,6 +209,18 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
             <span className="material-symbols-outlined text-on-surface-variant text-base flex-shrink-0 mt-0.5">location_on</span>
             <div className="flex-1">
               <span className="text-on-surface">{customer.address}</span>
+              {customer.buildingDetails && (
+                <p className="text-on-surface text-sm mt-1 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-on-surface-variant text-sm">apartment</span>
+                  {customer.buildingDetails}
+                </p>
+              )}
+              {customer.landmark && (
+                <p className="text-on-surface-variant text-xs mt-0.5 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-on-surface-variant text-sm">signpost</span>
+                  {customer.landmark}
+                </p>
+              )}
               <div className="mt-1">
                 <a
                   href={customer.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(customer.address + (customer.address.toLowerCase().includes('chennai') ? '' : ', Chennai'))}`}

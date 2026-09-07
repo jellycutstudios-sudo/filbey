@@ -40,6 +40,8 @@ export async function GET(req: NextRequest) {
       phone: cleanPhone,
       name: data.name || '',
       address: data.address || '',
+      buildingDetails: data.buildingDetails || '',
+      landmark: data.landmark || '',
     });
   } catch (err) {
     console.warn('[API /api/customer GET error]:', err);
@@ -50,7 +52,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, phone, address, area, total, items } = body;
+    const { name, phone, address, buildingDetails, landmark, area, total, items } = body;
 
     const cleanPhone = String(phone || '').replace(/\D/g, '').slice(-10);
     const webhookUrl = process.env.GOOGLE_SHEET_WEBHOOK_URL;
@@ -59,6 +61,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, savedLocally: true, note: 'Webhook URL not set' });
     }
 
+    // Combine address parts into one string so no new Sheet columns are needed
+    const fullAddress = [
+      address || '',
+      buildingDetails ? `Flat/Floor/Bldg: ${buildingDetails}` : '',
+      landmark ? `Gate/Landmark: ${landmark}` : '',
+    ].filter(Boolean).join(' | ');
+
     // Forward to Google Apps Script Webhook
     const res = await fetch(webhookUrl, {
       method: 'POST',
@@ -66,7 +75,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         name: name || '',
         phone: cleanPhone,
-        address: address || '',
+        address: fullAddress,
         area: area || '',
         total: total || 0,
         items: items || '',

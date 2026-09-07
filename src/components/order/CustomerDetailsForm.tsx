@@ -7,6 +7,8 @@ export interface CustomerDetails {
   name: string;
   phone: string;
   address: string;
+  buildingDetails: string;
+  landmark: string;
   notes: string;
   mapsUrl?: string;
   latitude?: number;
@@ -21,12 +23,12 @@ interface CustomerDetailsFormProps {
 export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetailsFormProps) {
   const { checkPhoneEligibility, isPhoneEligibleForFirstOrder } = useCart();
   const [form, setForm] = useState<CustomerDetails>(() => {
-    if (typeof window === 'undefined') return { name: '', phone: '', address: '', notes: '' };
+    if (typeof window === 'undefined') return { name: '', phone: '', address: '', buildingDetails: '', landmark: '', notes: '' };
     try {
       const saved = localStorage.getItem('filbey_customer');
       if (saved) return JSON.parse(saved);
     } catch { /* ignore */ }
-    return { name: '', phone: '', address: '', notes: '' };
+    return { name: '', phone: '', address: '', buildingDetails: '', landmark: '', notes: '' };
   });
   const [hasSavedProfile] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -60,11 +62,13 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
             setPhoneCheckStatus('repeat');
             const foundName = res.name || form.name || '';
             setDetectedName(foundName);
-            // Autofill name or address if available and field is empty
+            // Autofill name, address, buildingDetails and landmark if available and field is empty
             setForm(prev => ({
               ...prev,
               name: prev.name.trim() ? prev.name : (res.name || ''),
               address: prev.address.trim() ? prev.address : (res.address || ''),
+              buildingDetails: prev.buildingDetails.trim() ? prev.buildingDetails : (res.buildingDetails || ''),
+              landmark: prev.landmark.trim() ? prev.landmark : (res.landmark || ''),
             }));
           } else {
             setPhoneCheckStatus('first-time');
@@ -288,8 +292,8 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
             id="customer-address"
             value={form.address}
             onChange={set('address')}
-            placeholder="Door No., Building, Street, Area, Landmark, Pincode"
-            rows={3}
+            placeholder="Street, Area, Pincode (e.g. 4th Cross St, Sholinganallur, 600119)"
+            rows={2}
             className={`w-full px-4 py-3.5 bg-white rounded-xl border text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-sm resize-none ${
               errors.address ? 'border-error ring-1 ring-error/30' : 'border-surface-variant/40'
             }`}
@@ -311,6 +315,47 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
             </div>
           )}
           {errors.address && <p className="text-xs text-error ml-1">{errors.address}</p>}
+        </div>
+
+        {/* Building Details */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="customer-building" className="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-wider text-xs">
+            Flat / Floor / Building <span className="normal-case font-normal">(optional — helps rider reach you directly)</span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant/50 text-lg pointer-events-none">apartment</span>
+            <input
+              id="customer-building"
+              type="text"
+              value={form.buildingDetails}
+              onChange={set('buildingDetails')}
+              placeholder="e.g. Flat 4B, 3rd Floor, Prestige Block C"
+              autoComplete="address-line2"
+              className="w-full pl-10 pr-4 py-3.5 bg-white rounded-xl border border-surface-variant/40 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-sm"
+            />
+          </div>
+          <p className="text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5 ml-1">
+            <span className="material-symbols-outlined text-xs text-primary">info</span>
+            No calls needed — rider goes straight to your door!
+          </p>
+        </div>
+
+        {/* Landmark / Gate */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="customer-landmark" className="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-wider text-xs">
+            Nearest Gate / Landmark <span className="normal-case font-normal">(optional)</span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant/50 text-lg pointer-events-none">signpost</span>
+            <input
+              id="customer-landmark"
+              type="text"
+              value={form.landmark}
+              onChange={set('landmark')}
+              placeholder="e.g. Gate 2, near Sholinganallur signal"
+              className="w-full pl-10 pr-4 py-3.5 bg-white rounded-xl border border-surface-variant/40 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-sm"
+            />
+          </div>
         </div>
 
         {/* Special instructions */}
