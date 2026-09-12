@@ -32,7 +32,9 @@ function buildWhatsAppMessage(
 
   const mapsLink = customer.mapsUrl
     ? customer.mapsUrl
-    : `https://maps.google.com/?q=${encodeURIComponent(customer.address + (customer.address.toLowerCase().includes('chennai') ? '' : ', Chennai'))}`;
+    : `https://maps.google.com/?q=${encodeURIComponent((customer.houseFlatFloor || '') + ' ' + (customer.area || customer.address) + ', Chennai')}`;
+
+  const addressTag = customer.saveAs || customer.addressType || 'Home';
 
   return (
     `🍗 *New Order — Filbey Direct Delivery*\n\n` +
@@ -42,14 +44,14 @@ function buildWhatsAppMessage(
     `🚗 *Delivery:* ${deliveryStr}\n` +
     `🧾 *GST on Food (5%):* ₹${gstAmount}\n` +
     `✅ *Total to Pay:* ₹${total}\n\n` +
-    `📍 *Delivery Address:*\n${customer.address}\n` +
-    (customer.buildingDetails ? `🏢 *Flat / Floor / Building:* ${customer.buildingDetails}\n` : '') +
-    (customer.landmark ? `🚪 *Gate / Landmark:* ${customer.landmark}\n` : '') +
-    `🗺️ *Google Maps Pin:* ${mapsLink}\n` +
-    `🏙️ *Area:* ${locationName}\n\n` +
-    `👤 *Name:* ${customer.name}\n` +
+    `📍 *Delivery Address (${addressTag}):*\n` +
+    `🚪 *Flat / Floor:* ${customer.houseFlatFloor || customer.address}\n` +
+    (customer.buildingStreet ? `🏢 *Building / Street:* ${customer.buildingStreet}\n` : '') +
+    `🏙️ *Area:* ${customer.area || locationName}\n` +
+    `🗺️ *Google Maps Pin:* ${mapsLink}\n\n` +
+    (customer.deliveryInstructions ? `📝 *Rider Instructions:* ${customer.deliveryInstructions}\n` : '') +
+    `👤 *Receiver:* ${customer.name}\n` +
     `📞 *Phone:* +91 ${customer.phone}\n` +
-    (customer.notes ? `📝 *Notes:* ${customer.notes}\n` : '') +
     `\n✨ _Customer ordered via Direct Web Menu — eligible for repeat direct ordering VIP perks!_`
   );
 }
@@ -101,9 +103,9 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
         name: customer.name,
         phone: customer.phone,
         address: customer.address,
-        buildingDetails: customer.buildingDetails || '',
-        landmark: customer.landmark || '',
-        area: locationName,
+        buildingDetails: customer.houseFlatFloor || '',
+        landmark: customer.buildingStreet || '',
+        area: customer.area || locationName,
         total,
         items: itemsSummary,
       }),
@@ -190,54 +192,71 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
         </div>
       </div>
 
-      {/* Delivery details */}
-      <div className="bg-white rounded-2xl border border-surface-variant/15 shadow-sm overflow-hidden mb-6">
-        <div className="px-5 py-3.5 border-b border-surface-variant/15 flex items-center gap-2">
-          <span className="material-symbols-outlined text-secondary text-lg">local_shipping</span>
-          <h2 className="font-label-lg text-on-surface text-sm uppercase tracking-wide">Delivery Details</h2>
+      {/* Delivery details - High Contrast Card */}
+      <div className="bg-white rounded-2xl border-2 border-gray-300 shadow-md overflow-hidden mb-6">
+        <div className="px-5 py-3.5 bg-gray-50 border-b-2 border-gray-200 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-red-600 text-xl font-bold">local_shipping</span>
+            <h2 className="text-xs font-black text-gray-950 uppercase tracking-wider">Delivery Details</h2>
+          </div>
+          <span className="text-[11px] font-black bg-gray-900 text-white px-2.5 py-0.5 rounded-full uppercase">
+            {customer.saveAs || customer.addressType || 'Home'}
+          </span>
         </div>
-        <div className="px-5 py-4 flex flex-col gap-2.5 text-sm">
-          <div className="flex gap-3">
-            <span className="material-symbols-outlined text-on-surface-variant text-base flex-shrink-0 mt-0.5">person</span>
-            <span className="text-on-surface">{customer.name}</span>
+
+        <div className="px-5 py-4 flex flex-col gap-3 text-sm">
+          {/* Receiver & Phone */}
+          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-gray-700 text-lg">person</span>
+              <span className="font-extrabold text-gray-950">{customer.name}</span>
+            </div>
+            <div className="flex items-center gap-1.5 font-bold text-gray-800">
+              <span className="material-symbols-outlined text-emerald-600 text-base">call</span>
+              <span>+91 {customer.phone}</span>
+            </div>
           </div>
+
+          {/* Doorstep Address Breakdown */}
           <div className="flex gap-3">
-            <span className="material-symbols-outlined text-on-surface-variant text-base flex-shrink-0 mt-0.5">call</span>
-            <span className="text-on-surface">+91 {customer.phone}</span>
-          </div>
-          <div className="flex gap-3">
-            <span className="material-symbols-outlined text-on-surface-variant text-base flex-shrink-0 mt-0.5">location_on</span>
-            <div className="flex-1">
-              <span className="text-on-surface">{customer.address}</span>
-              {customer.buildingDetails && (
-                <p className="text-on-surface text-sm mt-1 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-on-surface-variant text-sm">apartment</span>
-                  {customer.buildingDetails}
+            <span className="material-symbols-outlined text-red-600 text-xl shrink-0 mt-0.5">location_on</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-black text-gray-950 text-sm leading-snug">
+                {customer.houseFlatFloor || customer.address}
+              </p>
+              {customer.buildingStreet && (
+                <p className="font-bold text-gray-800 text-xs mt-0.5 leading-snug">
+                  {customer.buildingStreet}
                 </p>
               )}
-              {customer.landmark && (
-                <p className="text-on-surface-variant text-xs mt-0.5 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-on-surface-variant text-sm">signpost</span>
-                  {customer.landmark}
-                </p>
-              )}
-              <div className="mt-1">
+              <p className="font-semibold text-gray-600 text-xs mt-0.5 leading-snug">
+                {customer.area || locationName}
+              </p>
+
+              {/* Maps pin link */}
+              <div className="mt-2 flex items-center gap-2">
                 <a
-                  href={customer.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(customer.address + (customer.address.toLowerCase().includes('chennai') ? '' : ', Chennai'))}`}
+                  href={customer.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent((customer.houseFlatFloor || '') + ' ' + (customer.area || customer.address) + ', Chennai')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-emerald-700 font-semibold hover:underline bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"
+                  className="inline-flex items-center gap-1 text-xs text-emerald-800 font-extrabold hover:underline bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-300 shadow-xs"
                 >
-                  <span className="material-symbols-outlined text-xs">place</span>
-                  Google Maps Pin Attached for Rider ↗
+                  <span className="material-symbols-outlined text-sm text-emerald-700">place</span>
+                  Exact GPS Pin Attached for Rider ↗
                 </a>
               </div>
             </div>
           </div>
-          {customer.notes && (
-            <div className="flex gap-3">
-              <span className="material-symbols-outlined text-on-surface-variant text-base flex-shrink-0 mt-0.5">sticky_note_2</span>
-              <span className="text-on-surface-variant italic">{customer.notes}</span>
+
+
+          {/* Delivery instructions */}
+          {customer.deliveryInstructions && (
+            <div className="pt-2 border-t border-gray-100 flex items-start gap-2 text-xs">
+              <span className="material-symbols-outlined text-orange-600 text-base shrink-0 mt-0.5">tips_and_updates</span>
+              <div>
+                <span className="font-black text-gray-900 uppercase tracking-wide text-[10px] block">Rider Instructions:</span>
+                <span className="font-bold text-gray-800">{customer.deliveryInstructions}</span>
+              </div>
             </div>
           )}
         </div>

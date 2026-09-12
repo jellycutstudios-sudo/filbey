@@ -1,7 +1,7 @@
-'use client';
-
 import { useState } from 'react';
 import { DeliveryInfo } from '@/context/CartContext';
+import LocationSelectModal from './LocationSelectModal';
+import { SavedAddress, getActiveRegisteredPhone } from '@/utils/addressStorage';
 
 // Restaurant anchor point
 const RESTAURANT = { lat: 12.9696, lng: 80.2435, name: 'Perungudi, OMR' };
@@ -44,7 +44,25 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
   const [detectedFee, setDetectedFee] = useState<number | null>(null);
   const [manualArea, setManualArea] = useState('');
   const [manualError, setManualError] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const open = isOpen();
+
+  const handleModalSelect = (loc: { area: string; lat: number; lng: number; mapsUrl: string; savedAddress?: SavedAddress }) => {
+    const km = haversineKm(loc.lat, loc.lng, RESTAURANT.lat, RESTAURANT.lng);
+    const fee = getDeliveryFee(km);
+    if (fee === null) {
+      setDetectedKm(km);
+      setStatus('out-of-range');
+    } else {
+      onConfirm({
+        distance: km,
+        fee,
+        locationName: loc.savedAddress?.saveAs
+          ? `${loc.savedAddress.saveAs} (${loc.savedAddress.houseFlatFloor})`
+          : loc.area,
+      });
+    }
+  };
 
   const handleGPS = () => {
     if (!navigator.geolocation) { setStatus('denied'); return; }
@@ -148,14 +166,28 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
           {(status === 'idle' || status === 'denied') && (
             <div className="flex flex-col gap-4">
               {status === 'idle' && (
-                <button
-                  id="use-gps-btn"
-                  onClick={handleGPS}
-                  className="flex items-center justify-center gap-2 bg-primary text-white font-label-lg text-label-lg py-3.5 rounded-full hover:bg-primary-container hover:shadow-[0_8px_30px_rgba(93,0,12,0.3)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-lg">my_location</span>
-                  Use My Location
-                </button>
+                <div className="flex flex-col gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center justify-between px-4 py-3.5 bg-red-50 hover:bg-red-100/80 rounded-2xl border-2 border-red-500 text-red-700 font-extrabold text-sm transition-all cursor-pointer shadow-xs group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="material-symbols-outlined text-red-600 text-xl font-bold">place</span>
+                      <span>Select Location &amp; Saved Addresses</span>
+                    </div>
+                    <span className="material-symbols-outlined text-red-500 text-base group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+                  </button>
+
+                  <button
+                    id="use-gps-btn"
+                    onClick={handleGPS}
+                    className="flex items-center justify-center gap-2 bg-primary text-white font-label-lg text-label-lg py-3.5 rounded-full hover:bg-primary-container hover:shadow-[0_8px_30px_rgba(93,0,12,0.3)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-lg">my_location</span>
+                    Use My Location (GPS)
+                  </button>
+                </div>
               )}
 
               {status === 'denied' && (
@@ -315,6 +347,14 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
           📍 Filbey — Perungudi, OMR, Chennai
         </p>
       </div>
+
+      {/* Location Selector Sheet (Screenshot 2) */}
+      <LocationSelectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        registeredPhone={getActiveRegisteredPhone()}
+        onSelectLocation={handleModalSelect}
+      />
     </div>
   );
 }
