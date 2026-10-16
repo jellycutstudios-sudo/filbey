@@ -427,7 +427,7 @@ export default function LocationSelectModal({
               {/* Address Tag Selector */}
               <div>
                 <label className="block text-xs font-black text-gray-900 uppercase tracking-wider mb-1.5">
-                  Save Address As <span className="text-red-600">*</span>
+                  Deliver to: <span className="text-gray-500 text-[10px] font-bold normal-case">(Home / Work / Other)</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[

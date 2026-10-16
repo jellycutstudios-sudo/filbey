@@ -220,10 +220,6 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
       errs.area = 'Area is required';
     }
 
-    if (!saveAs.trim()) {
-      errs.saveAs = 'Please provide an address label (e.g. Home)';
-    }
-
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -462,49 +458,66 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
             <div className="bg-white rounded-2xl border-2 border-gray-200 p-4 shadow-sm space-y-3.5">
               
               {/* Category Pills: [ House ] [ Office ] [ Other ] */}
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleTypeChange('House')}
-                  className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    addressType === 'House'
-                      ? 'bg-gray-950 text-white shadow-md'
-                      : 'bg-white text-gray-800 border-2 border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-base">home</span>
-                  <span>House</span>
-                </button>
+              <div>
+                <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5">
+                  Deliver to:
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleTypeChange('House')}
+                    className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      addressType === 'House'
+                        ? 'bg-gray-950 text-white shadow-md'
+                        : 'bg-white text-gray-800 border-2 border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">home</span>
+                    <span>House</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => handleTypeChange('Office')}
-                  className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    addressType === 'Office'
-                      ? 'bg-gray-950 text-white shadow-md'
-                      : 'bg-white text-gray-800 border-2 border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-base">business_center</span>
-                  <span>Office</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTypeChange('Office')}
+                    className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      addressType === 'Office'
+                        ? 'bg-gray-950 text-white shadow-md'
+                        : 'bg-white text-gray-800 border-2 border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">business_center</span>
+                    <span>Office</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => handleTypeChange('Other')}
-                  className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    addressType === 'Other'
-                      ? 'bg-gray-950 text-white shadow-md'
-                      : 'bg-white text-gray-800 border-2 border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-base">near_me</span>
-                  <span>Other</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTypeChange('Other')}
+                    className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      addressType === 'Other'
+                        ? 'bg-gray-950 text-white shadow-md'
+                        : 'bg-white text-gray-800 border-2 border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">near_me</span>
+                    <span>Other</span>
+                  </button>
+                </div>
+                {addressType === 'Other' && (
+                  <input
+                    type="text"
+                    value={saveAs === 'Other' ? '' : saveAs}
+                    onChange={(e) => setSaveAs(e.target.value)}
+                    placeholder="Custom label (e.g. Gym, Friend's house)"
+                    className="w-full mt-2 px-3.5 py-2.5 bg-white rounded-xl border-2 border-gray-300 text-gray-950 text-xs font-semibold placeholder-gray-400 focus:outline-none focus:border-red-600"
+                  />
+                )}
               </div>
 
-              {/* House / Flat / Floor * */}
+              {/* House / Flat / Floor / Building * */}
               <div>
+                <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5">
+                  Flat / House / Floor / Building <span className="text-red-600">*</span>
+                </label>
                 <input
                   type="text"
                   value={houseFlatFloor}
@@ -512,8 +525,8 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
                     setHouseFlatFloor(e.target.value);
                     setErrors(prev => ({ ...prev, houseFlatFloor: '' }));
                   }}
-                  placeholder="House / Flat / Floor *"
-                  className={`w-full px-3.5 py-3 bg-white rounded-xl border-2 text-gray-950 text-sm font-medium placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors ${
+                  placeholder="e.g. Flat 402, 3rd Floor, Raahath Residency"
+                  className={`w-full px-3.5 py-3 bg-white rounded-xl border-2 text-gray-950 text-sm font-semibold placeholder-gray-400 focus:outline-none focus:border-red-600 transition-colors ${
                     errors.houseFlatFloor ? 'border-red-500 bg-red-50/20' : 'border-gray-300'
                   }`}
                 />
@@ -524,67 +537,56 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
 
               {/* Building / Street (Recommended) */}
               <div>
+                <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5">
+                  Street / Nearby Landmark <span className="text-gray-500 text-[10px] font-bold tracking-normal">(Optional)</span>
+                </label>
                 <input
                   type="text"
                   value={buildingStreet}
                   onChange={(e) => setBuildingStreet(e.target.value)}
-                  placeholder="Building / Street (Recommended)"
-                  className="w-full px-3.5 py-3 bg-white rounded-xl border-2 border-gray-300 text-gray-950 text-sm font-medium placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors"
+                  placeholder="e.g. Indrapriyadharshini Nagar, near Apollo / Church"
+                  className="w-full px-3.5 py-3 bg-white rounded-xl border-2 border-gray-300 text-gray-950 text-sm font-semibold placeholder-gray-400 focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>
 
               {/* Area Card with Mini-Map Preview and "Change" Pin button (Screenshot 1) */}
-              <div className="bg-[#F8F9FB] rounded-2xl border-2 border-gray-300 p-3.5 flex items-center justify-between gap-3">
-                <div className="flex-1 min-w-0 pr-1">
-                  <div className="flex items-center gap-1.5 text-xs font-black text-gray-500 uppercase tracking-wider mb-1">
-                    <span>Area</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                  </div>
-                  <p className="text-xs font-bold text-gray-950 leading-relaxed line-clamp-3">
-                    {area || 'Tap Change on the right to select your exact delivery area'}
-                  </p>
-                  {errors.area && (
-                    <p className="text-xs text-red-600 font-bold mt-1">{errors.area}</p>
-                  )}
-                </div>
-
-                {/* Mini Map Thumbnail with Red Pin + "Change" button */}
-                <button
-                  type="button"
-                  onClick={() => setIsLocationModalOpen(true)}
-                  className="w-20 h-20 rounded-2xl bg-white border-2 border-gray-300 overflow-hidden relative shadow-xs flex flex-col items-center justify-center shrink-0 hover:border-red-600 hover:shadow-md transition-all group cursor-pointer"
-                  title="Change Location Pin"
-                >
-                  {/* Subtle map grid background */}
-                  <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:8px_8px] bg-slate-100 pointer-events-none" />
-                  
-                  {/* Pin icon */}
-                  <div className="relative z-10 w-8 h-8 rounded-full bg-red-50 border border-red-200 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-xl">location_on</span>
-                  </div>
-                  <span className="relative z-10 text-[11px] font-black text-red-600 tracking-tight mt-0.5 group-hover:underline">
-                    Change
-                  </span>
-                </button>
-              </div>
-
-              {/* Save address as * */}
               <div>
-                <input
-                  type="text"
-                  value={saveAs}
-                  onChange={(e) => {
-                    setSaveAs(e.target.value);
-                    setErrors(prev => ({ ...prev, saveAs: '' }));
-                  }}
-                  placeholder="Save address as *"
-                  className={`w-full px-3.5 py-3 bg-white rounded-xl border-2 text-gray-950 text-sm font-medium placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors ${
-                    errors.saveAs ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.saveAs && (
-                  <p className="text-xs text-red-600 font-bold mt-1">{errors.saveAs}</p>
-                )}
+                <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5">
+                  Area &amp; Delivery Zone
+                </label>
+                <div className="bg-[#F8F9FB] rounded-2xl border-2 border-gray-300 p-3.5 flex items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0 pr-1">
+                    <div className="flex items-center gap-1.5 text-xs font-black text-gray-500 uppercase tracking-wider mb-1">
+                      <span>Verified Delivery Area</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    </div>
+                    <p className="text-xs font-bold text-gray-950 leading-relaxed line-clamp-3">
+                      {area || 'Tap Change on the right to select your exact delivery area'}
+                    </p>
+                    {errors.area && (
+                      <p className="text-xs text-red-600 font-bold mt-1">{errors.area}</p>
+                    )}
+                  </div>
+
+                  {/* Mini Map Thumbnail with Red Pin + "Change" button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsLocationModalOpen(true)}
+                    className="w-20 h-20 rounded-2xl bg-white border-2 border-gray-300 overflow-hidden relative shadow-xs flex flex-col items-center justify-center shrink-0 hover:border-red-600 hover:shadow-md transition-all group cursor-pointer"
+                    title="Change Location Pin"
+                  >
+                    {/* Subtle map grid background */}
+                    <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:8px_8px] bg-slate-100 pointer-events-none" />
+                    
+                    {/* Pin icon */}
+                    <div className="relative z-10 w-8 h-8 rounded-full bg-red-50 border border-red-200 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
+                      <span className="material-symbols-outlined text-xl">location_on</span>
+                    </div>
+                    <span className="relative z-10 text-[11px] font-black text-red-600 tracking-tight mt-0.5 group-hover:underline">
+                      Change
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
