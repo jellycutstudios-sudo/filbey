@@ -475,7 +475,7 @@ export default function LocationSelectModal({
                   type="text"
                   value={newHouseFlatFloor}
                   onChange={(e) => setNewHouseFlatFloor(e.target.value)}
-                  placeholder="e.g. Flat 301, Raahath Residency, 2nd Floor"
+                  placeholder="e.g. Flat 301, 2nd Floor, Lotus Apartments"
                   className="w-full px-3.5 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-950 placeholder-gray-400 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 shadow-xs"
                 />
               </div>
@@ -518,7 +518,7 @@ export default function LocationSelectModal({
                   type="text"
                   value={newBuildingStreet}
                   onChange={(e) => setNewBuildingStreet(e.target.value)}
-                  placeholder="e.g. Near Apollo Hospital, 2nd Main Road"
+                  placeholder="e.g. Main Road, near Landmark"
                   className="w-full px-3.5 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-950 placeholder-gray-400 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 shadow-xs"
                 />
               </div>
@@ -538,7 +538,7 @@ export default function LocationSelectModal({
                       maxLength={10}
                       value={newPhone}
                       onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, ''))}
-                      placeholder="10-digit number"
+                      placeholder="10-digit mobile number"
                       className="w-full px-3 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-950 placeholder-gray-400 focus:outline-none focus:border-red-600 shadow-xs"
                     />
                   </div>
@@ -552,7 +552,7 @@ export default function LocationSelectModal({
                     type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    placeholder="e.g. Salman"
+                    placeholder="Enter receiver name"
                     className="w-full px-3.5 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-950 placeholder-gray-400 focus:outline-none focus:border-red-600 shadow-xs"
                   />
                 </div>

@@ -392,7 +392,7 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
                         else setReceiverName(e.target.value);
                         setErrors(prev => ({ ...prev, name: '', receiverName: '' }));
                       }}
-                      placeholder="e.g. Afeef Ahmed"
+                      placeholder="Enter full name"
                       className="w-full px-3.5 py-2.5 bg-gray-50 rounded-xl border border-gray-300 text-gray-950 text-sm font-semibold focus:outline-none focus:border-red-600 focus:bg-white"
                     />
                     {(errors.name || errors.receiverName) && (
@@ -420,7 +420,7 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
                           else setReceiverPhone(v);
                           setErrors(prev => ({ ...prev, phone: '', receiverPhone: '' }));
                         }}
-                        placeholder="9876543210"
+                        placeholder="10-digit mobile number"
                         className="flex-1 px-3.5 py-2.5 bg-gray-50 rounded-xl border border-gray-300 text-gray-950 text-sm font-semibold focus:outline-none focus:border-red-600 focus:bg-white"
                       />
                     </div>
@@ -525,7 +525,7 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
                     setHouseFlatFloor(e.target.value);
                     setErrors(prev => ({ ...prev, houseFlatFloor: '' }));
                   }}
-                  placeholder="e.g. Flat 402, 3rd Floor, Raahath Residency"
+                  placeholder="e.g. Flat 402, 3rd Floor, Lotus Apartments"
                   className={`w-full px-3.5 py-3 bg-white rounded-xl border-2 text-gray-950 text-sm font-semibold placeholder-gray-400 focus:outline-none focus:border-red-600 transition-colors ${
                     errors.houseFlatFloor ? 'border-red-500 bg-red-50/20' : 'border-gray-300'
                   }`}
@@ -544,7 +544,7 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
                   type="text"
                   value={buildingStreet}
                   onChange={(e) => setBuildingStreet(e.target.value)}
-                  placeholder="e.g. Indrapriyadharshini Nagar, near Apollo / Church"
+                  placeholder="e.g. 2nd Cross Street, near Landmark"
                   className="w-full px-3.5 py-3 bg-white rounded-xl border-2 border-gray-300 text-gray-950 text-sm font-semibold placeholder-gray-400 focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>
