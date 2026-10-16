@@ -4,6 +4,8 @@ import { useState, useMemo, useRef } from 'react';
 import { MENU_DATA, MenuItem } from '@/data/menuData';
 import { useCart } from '@/context/CartContext';
 import CartDrawer from './CartDrawer';
+import LocationSelectModal from './LocationSelectModal';
+import { SavedAddress, getActiveRegisteredPhone } from '@/utils/addressStorage';
 
 // Swiggy / Zomato Style Customisation Modal for Multi-portion Dishes
 function CustomisationModal({
@@ -358,6 +360,7 @@ export default function OrderMenuClient({ onProceed }: { onProceed: () => void }
     items,
     subtotal,
     deliveryInfo,
+    setDeliveryInfo,
     addItem,
     updateQty,
     itemCount,
@@ -368,10 +371,31 @@ export default function OrderMenuClient({ onProceed }: { onProceed: () => void }
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const [cartOpen, setCartOpen] = useState(false);
   const [customiseItem, setCustomiseItem] = useState<MenuItem | null>(null);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const MIN_ORDER = 149;
+
+  const handleLocationSelect = (loc: { area: string; lat: number; lng: number; mapsUrl: string; savedAddress?: SavedAddress }) => {
+    const R = 6371;
+    const dLat = ((loc.lat - 12.9696) * Math.PI) / 180;
+    const dLng = ((loc.lng - 80.2435) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((12.9696 * Math.PI) / 180) *
+        Math.cos((loc.lat * Math.PI) / 180) *
+        Math.sin(dLng / 2) ** 2;
+    let km = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    let fee = km <= 3.5 ? 39 : km <= 8.5 ? 59 : 79;
+    setDeliveryInfo({
+      distance: km,
+      fee,
+      locationName: loc.savedAddress?.saveAs
+        ? `${loc.savedAddress.saveAs} (${loc.savedAddress.houseFlatFloor})`
+        : loc.area,
+    });
+  };
 
   const toggleCategory = (catId: string) => {
     setCollapsedCategories(prev => ({ ...prev, [catId]: !prev[catId] }));
@@ -405,17 +429,23 @@ export default function OrderMenuClient({ onProceed }: { onProceed: () => void }
 
       {/* ── Compact Delivery Header & Offer Strip ── */}
       <div className="pt-2 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-stone-200 mb-3">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+        <button
+          type="button"
+          onClick={() => setIsLocationModalOpen(true)}
+          className="flex items-center gap-2 group cursor-pointer text-left focus:outline-none"
+          title="Tap to change or add delivery address"
+        >
+          <span className="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>
             moped
           </span>
           <div className="min-w-0">
-            <p className="text-xs font-black text-stone-950 truncate">
-              {deliveryInfo?.locationName ? `Delivering to ${deliveryInfo.locationName}` : 'Delivering in Perungudi, OMR'}
+            <p className="text-xs font-black text-stone-950 truncate flex items-center gap-1 group-hover:text-primary transition-colors">
+              <span>{deliveryInfo?.locationName ? `Delivering to ${deliveryInfo.locationName}` : 'Delivering in Perungudi, OMR'}</span>
+              <span className="material-symbols-outlined text-xs font-bold text-stone-500 group-hover:text-primary">expand_more</span>
             </p>
-            <p className="text-xs text-stone-700 font-semibold">30–45 mins · Live Kitchen</p>
+            <p className="text-xs text-stone-700 font-semibold">30–45 mins · Tap to change address</p>
           </div>
-        </div>
+        </button>
 
         {/* Slim 1-Line Offer Pill */}
         <div className="inline-flex items-center gap-1.5 bg-white border-2 border-amber-400 px-3 py-1 rounded-full text-xs font-black text-stone-950 w-fit shadow-xs">
@@ -596,6 +626,14 @@ export default function OrderMenuClient({ onProceed }: { onProceed: () => void }
         onProceed={() => { setCartOpen(false); onProceed(); }}
         meetsMinOrder={meetsMinOrder}
         minOrder={MIN_ORDER}
+      />
+
+      {/* Location / Address Selector Modal */}
+      <LocationSelectModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        registeredPhone={getActiveRegisteredPhone()}
+        onSelectLocation={handleLocationSelect}
       />
     </div>
   );

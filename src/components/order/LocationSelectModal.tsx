@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   SavedAddress,
   getSavedAddresses,
+  saveAddress,
   deleteSavedAddress,
   getDistanceFromRestaurant,
   calculateDistanceKm,
@@ -67,9 +68,23 @@ export default function LocationSelectModal({
   const [isChangingPhone, setIsChangingPhone] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Add Address Form State
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [newTag, setNewTag] = useState<'House' | 'Office' | 'Other'>('House');
+  const [newSaveAs, setNewSaveAs] = useState('Home');
+  const [newHouseFlatFloor, setNewHouseFlatFloor] = useState('');
+  const [newBuildingStreet, setNewBuildingStreet] = useState('');
+  const [newArea, setNewArea] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newFormError, setNewFormError] = useState('');
+  const [isSavingNewAddress, setIsSavingNewAddress] = useState(false);
+
   // Load saved addresses ONLY for registered phone
   useEffect(() => {
     if (isOpen) {
+      setIsAddingAddress(false);
+      setNewFormError('');
       const p = cleanPhoneNumber(registeredPhone) || getActiveRegisteredPhone();
       setActivePhone(p);
       setPhoneLookupInput(p);
@@ -262,6 +277,72 @@ export default function LocationSelectModal({
     }
   };
 
+  const handleSaveNewAddress = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setNewFormError('');
+
+    if (!newHouseFlatFloor.trim()) {
+      setNewFormError('Please enter Flat / House No / Floor / Building name');
+      return;
+    }
+    if (!newArea.trim()) {
+      setNewFormError('Please enter or select your area / locality');
+      return;
+    }
+
+    const cleanPh = cleanPhoneNumber(newPhone) || cleanPhoneNumber(activePhone) || cleanPhoneNumber(registeredPhone) || getActiveRegisteredPhone();
+    if (!cleanPh || cleanPh.length !== 10) {
+      setNewFormError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+
+    setIsSavingNewAddress(true);
+
+    let lat = 12.9696;
+    let lng = 80.2435;
+    const match = POPULAR_AREAS.find(p =>
+      p.name.toLowerCase() === newArea.trim().toLowerCase() ||
+      newArea.toLowerCase().includes(p.name.toLowerCase())
+    );
+    if (match) {
+      lat = match.lat;
+      lng = match.lng;
+    } else if (currentCoords) {
+      lat = currentCoords.lat;
+      lng = currentCoords.lng;
+    }
+
+    const computedFull = [newHouseFlatFloor.trim(), newBuildingStreet.trim(), newArea.trim()].filter(Boolean).join(', ');
+    const saved = saveAddress({
+      tag: newTag,
+      saveAs: newSaveAs.trim() || newTag,
+      houseFlatFloor: newHouseFlatFloor.trim(),
+      buildingStreet: newBuildingStreet.trim(),
+      area: newArea.trim(),
+      fullAddress: computedFull,
+      latitude: lat,
+      longitude: lng,
+      mapsUrl: `https://maps.google.com/?q=${lat},${lng}`,
+      receiverName: newName.trim(),
+      receiverPhone: cleanPh,
+    }, cleanPh);
+
+    setActivePhone(cleanPh);
+    setActiveRegisteredPhone(cleanPh);
+    setSavedAddresses(getSavedAddresses(cleanPh));
+    setIsSavingNewAddress(false);
+    setIsAddingAddress(false);
+
+    onSelectLocation({
+      area: newArea.trim(),
+      lat,
+      lng,
+      mapsUrl: `https://maps.google.com/?q=${lat},${lng}`,
+      savedAddress: saved,
+    });
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -276,49 +357,228 @@ export default function LocationSelectModal({
       <div className="relative w-full sm:max-w-md bg-[#F8F9FA] rounded-t-3xl sm:rounded-3xl shadow-2xl z-10 overflow-hidden max-h-[92vh] flex flex-col border border-gray-300">
         
         {/* Header */}
-        <div className="bg-white px-5 pt-4 pb-3.5 border-b border-gray-200 flex items-center gap-3">
+        <div className="bg-white px-5 pt-4 pb-3.5 border-b border-gray-200 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                if (isAddingAddress) setIsAddingAddress(false);
+                else onClose();
+              }}
+              className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-800 transition-colors border border-gray-300 cursor-pointer"
+              aria-label={isAddingAddress ? 'Back to locations' : 'Close'}
+            >
+              <span className="material-symbols-outlined text-xl text-gray-900 font-bold">
+                {isAddingAddress ? 'arrow_back' : 'keyboard_arrow_down'}
+              </span>
+            </button>
+            <h2 className="text-lg font-black text-gray-950 tracking-tight">
+              {isAddingAddress ? 'Add Delivery Address' : 'Select a location'}
+            </h2>
+          </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-800 transition-colors border border-gray-300"
-            aria-label="Back"
+            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
+            aria-label="Close"
           >
-            <span className="material-symbols-outlined text-xl text-gray-900 font-bold">keyboard_arrow_down</span>
+            <span className="material-symbols-outlined text-lg">close</span>
           </button>
-          <h2 className="text-lg font-black text-gray-950 tracking-tight">
-            Select a location
-          </h2>
         </div>
 
-        {/* Search Bar - High Contrast */}
-        <div className="p-4 bg-white border-b border-gray-200">
-          <div className="relative flex items-center">
-            <span className="absolute left-3.5 text-red-600 material-symbols-outlined text-xl pointer-events-none font-bold">
-              search
-            </span>
-            <input
-              ref={inputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for area, street name..."
-              className="w-full pl-11 pr-10 py-3 bg-gray-50 rounded-2xl border-2 border-gray-300 text-gray-950 placeholder-gray-500 font-medium text-sm focus:outline-none focus:border-red-600 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all shadow-inner"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 text-gray-500 hover:text-gray-900 p-1 rounded-full"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            )}
+        {/* Search Bar - Hidden during Add Address */}
+        {!isAddingAddress && (
+          <div className="p-4 bg-white border-b border-gray-200">
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-red-600 material-symbols-outlined text-xl pointer-events-none font-bold">
+                search
+              </span>
+              <input
+                ref={inputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for area, street name..."
+                className="w-full pl-11 pr-10 py-3 bg-gray-50 rounded-2xl border-2 border-gray-300 text-gray-950 placeholder-gray-500 font-medium text-sm focus:outline-none focus:border-red-600 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all shadow-inner"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3.5 text-gray-500 hover:text-gray-900 p-1 rounded-full cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
 
-          {/* Search Results if typing */}
-          {searchQuery.trim().length > 0 ? (
+          {/* If isAddingAddress is TRUE: Render the Add Address Form */}
+          {isAddingAddress ? (
+            <div className="space-y-4 py-1">
+              {newFormError && (
+                <div className="p-3 bg-red-50 border-2 border-red-300 rounded-xl flex items-center gap-2 text-xs font-bold text-red-900">
+                  <span className="material-symbols-outlined text-red-600 text-base">error</span>
+                  <span>{newFormError}</span>
+                </div>
+              )}
+
+              {/* Address Tag Selector */}
+              <div>
+                <label className="block text-xs font-black text-gray-900 uppercase tracking-wider mb-1.5">
+                  Save Address As <span className="text-red-600">*</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { tag: 'House', label: 'Home', icon: 'home' },
+                    { tag: 'Office', label: 'Work', icon: 'business' },
+                    { tag: 'Other', label: 'Other', icon: 'place' },
+                  ].map((t) => (
+                    <button
+                      key={t.tag}
+                      type="button"
+                      onClick={() => {
+                        setNewTag(t.tag as any);
+                        if (t.tag === 'House') setNewSaveAs('Home');
+                        else if (t.tag === 'Office') setNewSaveAs('Work');
+                        else setNewSaveAs('Other');
+                      }}
+                      className={`py-2 px-3 rounded-xl border-2 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        newTag === t.tag
+                          ? 'border-red-600 bg-red-50 text-red-700 shadow-xs'
+                          : 'border-gray-300 bg-white text-gray-800 hover:border-gray-400'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-base">{t.icon}</span>
+                      <span>{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+                {newTag === 'Other' && (
+                  <input
+                    type="text"
+                    value={newSaveAs}
+                    onChange={(e) => setNewSaveAs(e.target.value)}
+                    placeholder="e.g. Gym, Friend's Place"
+                    className="w-full mt-2 px-3.5 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:border-red-600"
+                  />
+                )}
+              </div>
+
+              {/* House / Flat / Floor / Building */}
+              <div>
+                <label className="block text-xs font-black text-gray-900 uppercase tracking-wider mb-1">
+                  Flat / House / Floor / Building <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newHouseFlatFloor}
+                  onChange={(e) => setNewHouseFlatFloor(e.target.value)}
+                  placeholder="e.g. Flat 301, Raahath Residency, 2nd Floor"
+                  className="w-full px-3.5 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-950 placeholder-gray-400 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 shadow-xs"
+                />
+              </div>
+
+              {/* Area / Locality */}
+              <div>
+                <label className="block text-xs font-black text-gray-900 uppercase tracking-wider mb-1">
+                  Area / Locality <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newArea}
+                  onChange={(e) => setNewArea(e.target.value)}
+                  placeholder="e.g. Perungudi, OMR, Chennai"
+                  className="w-full px-3.5 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-950 placeholder-gray-400 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 shadow-xs"
+                />
+
+                {/* Quick Area Suggestion Chips */}
+                <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mr-1">Quick:</span>
+                  {POPULAR_AREAS.slice(0, 5).map((a) => (
+                    <button
+                      key={a.name}
+                      type="button"
+                      onClick={() => setNewArea(`${a.name}, OMR, Chennai`)}
+                      className="text-[11px] font-bold bg-gray-100 hover:bg-red-50 hover:text-red-700 text-gray-800 px-2.5 py-1 rounded-lg border border-gray-300 transition-colors cursor-pointer"
+                    >
+                      {a.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Street / Landmark */}
+              <div>
+                <label className="block text-xs font-black text-gray-900 uppercase tracking-wider mb-1">
+                  Street / Landmark <span className="text-gray-400 font-normal">(Optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={newBuildingStreet}
+                  onChange={(e) => setNewBuildingStreet(e.target.value)}
+                  placeholder="e.g. Near Apollo Hospital, 2nd Main Road"
+                  className="w-full px-3.5 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-950 placeholder-gray-400 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 shadow-xs"
+                />
+              </div>
+
+              {/* Mobile Number & Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-black text-gray-900 uppercase tracking-wider mb-1">
+                    Mobile Number <span className="text-red-600">*</span>
+                  </label>
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2.5 py-2.5 bg-gray-100 border-2 border-gray-300 rounded-xl text-xs font-black text-gray-800 shrink-0">
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      value={newPhone}
+                      onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, ''))}
+                      placeholder="10-digit number"
+                      className="w-full px-3 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-950 placeholder-gray-400 focus:outline-none focus:border-red-600 shadow-xs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-gray-900 uppercase tracking-wider mb-1">
+                    Receiver Name <span className="text-gray-400 font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="e.g. Salman"
+                    className="w-full px-3.5 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-xs font-bold text-gray-950 placeholder-gray-400 focus:outline-none focus:border-red-600 shadow-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Submit & Cancel Buttons */}
+              <div className="pt-2 flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsAddingAddress(false)}
+                  className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-black transition-colors cursor-pointer border border-gray-300"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveNewAddress}
+                  disabled={isSavingNewAddress}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 px-4 text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50"
+                >
+                  <span>Save &amp; Deliver Here</span>
+                  <span className="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+                </button>
+              </div>
+            </div>
+          ) : searchQuery.trim().length > 0 ? (
             <div className="bg-white rounded-2xl border-2 border-gray-200 p-2 shadow-sm">
               <div className="px-3 py-1.5 flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wider">
                 <span>Matching Locations</span>
@@ -398,8 +658,15 @@ export default function LocationSelectModal({
                 <button
                   type="button"
                   onClick={() => {
-                    if (onAddNewManualAddress) onAddNewManualAddress();
-                    onClose();
+                    setIsAddingAddress(true);
+                    if (!newArea) {
+                      if (searchQuery.trim()) setNewArea(searchQuery.trim());
+                      else if (currentGpsAddress) setNewArea(currentGpsAddress);
+                    }
+                    if (!newPhone) {
+                      const ph = activePhone || cleanPhoneNumber(registeredPhone) || getActiveRegisteredPhone();
+                      if (ph) setNewPhone(ph);
+                    }
                   }}
                   className="w-full text-left p-4 hover:bg-red-50/40 transition-colors flex items-center justify-between gap-3 group cursor-pointer"
                 >
@@ -435,15 +702,31 @@ export default function LocationSelectModal({
                       </span>
                     )}
                   </h3>
-                  {activePhone ? (
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setIsChangingPhone(!isChangingPhone)}
-                      className="text-[11px] font-black text-red-600 hover:underline cursor-pointer"
+                      onClick={() => {
+                        setIsAddingAddress(true);
+                        if (!newPhone) {
+                          const ph = activePhone || cleanPhoneNumber(registeredPhone) || getActiveRegisteredPhone();
+                          if (ph) setNewPhone(ph);
+                        }
+                      }}
+                      className="text-[11px] font-black text-red-600 hover:underline cursor-pointer flex items-center gap-0.5"
                     >
-                      {isChangingPhone ? 'Cancel' : 'Change Mobile'}
+                      <span className="material-symbols-outlined text-sm font-bold">add</span>
+                      <span>Add New</span>
                     </button>
-                  ) : null}
+                    {activePhone && (
+                      <button
+                        type="button"
+                        onClick={() => setIsChangingPhone(!isChangingPhone)}
+                        className="text-[11px] font-bold text-gray-600 hover:underline cursor-pointer"
+                      >
+                        {isChangingPhone ? 'Cancel' : 'Change Mobile'}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* If no phone registered or user clicked Change Mobile: prompt for registered number */}

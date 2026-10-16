@@ -127,7 +127,11 @@ export function getSavedAddresses(phone?: string): SavedAddress[] {
 
 /** Save or update an address for a specific registered mobile number */
 export function saveAddress(
-  addr: Omit<SavedAddress, 'id' | 'createdAt' | 'registeredPhone'> & { id?: string; registeredPhone?: string },
+  addr: Omit<SavedAddress, 'id' | 'createdAt' | 'registeredPhone' | 'fullAddress'> & {
+    id?: string;
+    registeredPhone?: string;
+    fullAddress?: string;
+  },
   phone?: string
 ): SavedAddress {
   const targetPhone = cleanPhoneNumber(phone) || cleanPhoneNumber(addr.registeredPhone) || cleanPhoneNumber(addr.receiverPhone) || getActiveRegisteredPhone();

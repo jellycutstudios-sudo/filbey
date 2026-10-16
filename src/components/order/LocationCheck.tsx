@@ -21,9 +21,10 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
 }
 
 function getDeliveryFee(km: number): number | null {
-  if (km <= 3) return 39;
-  if (km <= 5) return 59;
-  return null; // out of core delivery range (> 5 km)
+  if (km <= 3.5) return 39;
+  if (km <= 8.5) return 59;
+  if (km <= 15) return 79;
+  return null; // out of delivery range (> 15 km)
 }
 
 function isOpen(): boolean {
@@ -48,8 +49,12 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
   const open = isOpen();
 
   const handleModalSelect = (loc: { area: string; lat: number; lng: number; mapsUrl: string; savedAddress?: SavedAddress }) => {
-    const km = haversineKm(loc.lat, loc.lng, RESTAURANT.lat, RESTAURANT.lng);
-    const fee = getDeliveryFee(km);
+    let km = haversineKm(loc.lat, loc.lng, RESTAURANT.lat, RESTAURANT.lng);
+    let fee = getDeliveryFee(km);
+    if (fee === null && km <= 15) {
+      km = Math.min(km, 8.5);
+      fee = 59;
+    }
     if (fee === null) {
       setDetectedKm(km);
       setStatus('out-of-range');
@@ -120,7 +125,7 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
             Deliver to You
           </h1>
           <p className="text-stone-700 mt-1.5 text-xs sm:text-sm font-medium">
-            Direct doorstep delivery within <strong className="text-stone-900 font-bold">5 km</strong> of Perungudi, OMR
+            Direct doorstep delivery across Perungudi, OMR &amp; surrounding areas
           </p>
         </div>
 
@@ -244,7 +249,7 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
               <div>
                 <p className="font-bold text-on-surface text-lg">Outside delivery zone</p>
                 <p className="text-on-surface-variant text-sm mt-1">
-                  You&apos;re <strong>{detectedKm?.toFixed(1)} km</strong> away. We currently deliver within 5 km.
+                  You&apos;re <strong>{detectedKm?.toFixed(1)} km</strong> away. We currently deliver up to 15 km along OMR &amp; nearby areas.
                 </p>
                 <p className="text-sm text-on-surface-variant mt-3">
                   You can still{' '}
@@ -272,7 +277,7 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
                 <span className="material-symbols-outlined text-secondary" style={{ fontSize: 36 }}>help</span>
               </div>
               <div>
-                <p className="font-bold text-on-surface text-lg">Are you within 5 km of OMR?</p>
+                <p className="font-bold text-on-surface text-lg">Are you along the OMR delivery corridor?</p>
                 <p className="text-on-surface-variant text-sm mt-1">
                   Area: <strong>{manualArea}</strong>
                 </p>
