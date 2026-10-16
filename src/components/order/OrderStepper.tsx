@@ -11,45 +11,6 @@ import { getRestaurantStatus, type OpenStatus } from '@/utils/restaurantHours';
 
 type Step = 'location' | 'menu' | 'details' | 'confirm' | 'success';
 
-const STEPS = ['location', 'menu', 'details', 'confirm'] as const;
-const STEP_LABELS = ['Location', 'Menu', 'Details', 'Review'];
-
-function StepIndicator({ current }: { current: Step }) {
-  const idx = STEPS.indexOf(current as (typeof STEPS)[number]);
-  if (idx === -1) return null;
-  return (
-    <div className="flex items-center justify-center gap-0 px-4 py-3 max-w-sm mx-auto">
-      {STEPS.map((step, i) => (
-        <div key={step} className="flex items-center flex-1">
-          <div className="flex flex-col items-center flex-1">
-            <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                i < idx
-                  ? 'bg-primary text-white'
-                  : i === idx
-                  ? 'bg-primary text-white ring-4 ring-primary/20'
-                  : 'bg-surface-container text-on-surface-variant border border-surface-variant/30'
-              }`}
-            >
-              {i < idx ? (
-                <span className="material-symbols-outlined text-sm">check</span>
-              ) : (
-                i + 1
-              )}
-            </div>
-            <span className={`text-[10px] mt-1 font-semibold ${i === idx ? 'text-primary' : 'text-on-surface-variant/60'}`}>
-              {STEP_LABELS[i]}
-            </span>
-          </div>
-          {i < STEPS.length - 1 && (
-            <div className={`h-0.5 flex-1 mx-1 mb-4 rounded-full transition-all duration-500 ${i < idx ? 'bg-primary' : 'bg-surface-variant/30'}`} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function OrderStepper() {
   const [step, setStep] = useState<Step>('location');
   const [customer, setCustomer] = useState<CustomerDetails | null>(null);
@@ -159,37 +120,39 @@ export default function OrderStepper() {
   }
 
   return (
-    <div>
+    <div className="pb-8">
+
       {/* ── Closed Hours Banner ── */}
       {restaurantStatus && !restaurantStatus.isOpen && (
-        <div className="mx-4 mt-4 mb-2 bg-amber-50 border border-amber-300 rounded-2xl px-4 py-3.5 flex items-start gap-3">
-          <span className="text-2xl shrink-0 mt-0.5">🔴</span>
-          <div>
-            <p className="font-bold text-amber-800 text-sm">We're currently closed</p>
-            <p className="text-amber-700 text-xs mt-0.5 leading-relaxed">
-              Filbey is open <strong>11:30 AM – 11:30 PM</strong> every day. You can still browse the menu and place your order — we'll prepare it as soon as we open!
-            </p>
-            <p className="text-amber-600 text-xs mt-1.5 font-semibold">
-              ⏰ Opens in ~{Math.round(restaurantStatus.minutesUntilChange / 60)} hr{restaurantStatus.minutesUntilChange > 90 ? 's' : ''}
-            </p>
+        <div className="max-w-md mx-auto mt-4 px-4">
+          <div className="bg-white border-2 border-amber-400 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 shrink-0 mt-1.5 animate-pulse" />
+            <div className="flex-1">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <p className="font-black text-stone-950 text-sm">We&apos;re currently closed</p>
+                <span className="text-xs font-black text-amber-950 bg-amber-100 border border-amber-400 px-2.5 py-0.5 rounded-full shadow-2xs">
+                  Opens in ~{Math.round(restaurantStatus.minutesUntilChange / 60)} hr{restaurantStatus.minutesUntilChange > 90 ? 's' : ''}
+                </span>
+              </div>
+              <p className="text-stone-800 text-xs mt-1.5 leading-relaxed font-medium">
+                Open daily <strong className="text-stone-950 font-bold">11:30 AM – 11:30 PM</strong>. You can still browse and pre-order — we&apos;ll prepare it fresh as soon as we open!
+              </p>
+            </div>
           </div>
         </div>
       )}
 
       {/* ── Open Banner (closing soon) ── */}
       {restaurantStatus?.isOpen && restaurantStatus.minutesUntilChange <= 60 && (
-        <div className="mx-4 mt-4 mb-2 bg-orange-50 border border-orange-300 rounded-2xl px-4 py-3 flex items-center gap-3">
-          <span className="text-xl shrink-0">⏰</span>
-          <p className="text-orange-800 text-xs font-semibold">
-            We're closing in {restaurantStatus.minutesUntilChange} minutes — order now to avoid missing out!
-          </p>
+        <div className="max-w-md mx-auto mt-4 px-4">
+          <div className="bg-orange-500/10 border border-orange-500/25 rounded-2xl px-4 py-3 flex items-center gap-2.5 shadow-2xs">
+            <span className="material-symbols-outlined text-orange-600 text-lg">schedule</span>
+            <p className="text-orange-950 text-xs font-semibold">
+              Closing in {restaurantStatus.minutesUntilChange} minutes — order now to avoid missing out!
+            </p>
+          </div>
         </div>
       )}
-
-      {/* Step progress indicator */}
-      <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-md border-b border-surface-variant/15 shadow-sm">
-        <StepIndicator current={step} />
-      </div>
 
       {step === 'location' && <LocationCheck onConfirm={handleLocationConfirm} />}
       {step === 'menu' && <OrderMenuClient onProceed={handleMenuProceed} />}

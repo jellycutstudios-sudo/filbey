@@ -106,141 +106,98 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
   };
 
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-10">
+    <div className="min-h-[75vh] flex flex-col items-center justify-center px-4 py-8 max-w-md mx-auto">
+      <div className="w-full">
 
-      {/* Closed banner */}
-      {!open && (
-        <div className="w-full max-w-md mb-6 bg-error-container border border-error/20 rounded-2xl p-4 text-center">
-          <span className="material-symbols-outlined text-error text-3xl block mb-1">schedule</span>
-          <p className="font-semibold text-on-error-container text-sm">We&apos;re currently closed</p>
-          <p className="text-xs text-on-error-container/70 mt-0.5">Open daily 11:30 AM – 11:30 PM</p>
-        </div>
-      )}
-
-      <div className="w-full max-w-md">
-
-        {/* Hero */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 shadow-[0_0_0_8px_rgba(93,0,12,0.05)]">
-            <span className="material-symbols-outlined text-primary" style={{ fontSize: 40 }}>delivery_dining</span>
+        {/* Hero Header */}
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center mx-auto mb-3.5 shadow-md shadow-primary/20">
+            <span className="material-symbols-outlined text-white text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              moped
+            </span>
           </div>
-          <h1 className="font-headline-lg text-headline-lg-mobile text-primary uppercase">Deliver to You</h1>
-          <p className="text-on-surface-variant mt-2 text-sm leading-relaxed">
-            We deliver within <strong>5 km</strong> of Perungudi, OMR.<br />
-            Minimum order ₹{MIN_ORDER}.
+          <h1 className="font-headline-lg text-2xl sm:text-3xl font-black text-stone-900 uppercase tracking-tight">
+            Deliver to You
+          </h1>
+          <p className="text-stone-700 mt-1.5 text-xs sm:text-sm font-medium">
+            Direct doorstep delivery within <strong className="text-stone-900 font-bold">5 km</strong> of Perungudi, OMR
           </p>
         </div>
 
-        {/* Promo callout */}
-        <div className="bg-gradient-to-r from-primary/10 via-secondary-container/25 to-primary/10 border border-primary/20 rounded-2xl p-3.5 mb-6 text-center">
-          <div className="flex items-center justify-center gap-1.5 text-primary font-bold text-xs uppercase tracking-wider mb-1">
-            <span className="material-symbols-outlined text-sm">local_fire_department</span>
-            <span>Direct Ordering Offers</span>
-          </div>
-          <p className="text-xs text-on-surface font-semibold">
-            ⚡ <span className="text-primary font-bold">FREE Delivery</span> on orders above ₹499
-          </p>
-          <p className="text-[11px] text-on-surface-variant mt-0.5">
-            🎉 <span className="font-bold text-on-surface">₹30 OFF</span> on your 1st direct order (min ₹399)
-          </p>
-        </div>
-
-        {/* Delivery tier cards */}
-        <div className="grid grid-cols-2 gap-3 mb-8">
-          <div className="bg-white rounded-2xl p-4 border border-surface-variant/20 text-center shadow-sm">
-            <span className="material-symbols-outlined text-secondary text-2xl">near_me</span>
-            <p className="font-bold text-primary text-xl mt-1">₹39</p>
-            <p className="text-xs text-on-surface-variant mt-0.5">Within 3 km</p>
-          </div>
-          <div className="bg-white rounded-2xl p-4 border border-surface-variant/20 text-center shadow-sm">
-            <span className="material-symbols-outlined text-secondary text-2xl">directions_car</span>
-            <p className="font-bold text-primary text-xl mt-1">₹59</p>
-            <p className="text-xs text-on-surface-variant mt-0.5">3 – 5 km</p>
-          </div>
-        </div>
-
-        {/* Main card */}
-        <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(42,31,29,0.08)] border border-surface-variant/10">
+        {/* Unified Location Action Card */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg shadow-stone-900/5 border border-stone-200">
 
           {/* IDLE */}
-          {(status === 'idle' || status === 'denied') && (
-            <div className="flex flex-col gap-4">
-              {status === 'idle' && (
-                <div className="flex flex-col gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center justify-between px-4 py-3.5 bg-red-50 hover:bg-red-100/80 rounded-2xl border-2 border-red-500 text-red-700 font-extrabold text-sm transition-all cursor-pointer shadow-xs group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="material-symbols-outlined text-red-600 text-xl font-bold">place</span>
-                      <span>Select Location &amp; Saved Addresses</span>
-                    </div>
-                    <span className="material-symbols-outlined text-red-500 text-base group-hover:translate-x-0.5 transition-transform">chevron_right</span>
-                  </button>
+          {status === 'idle' && (
+            <div className="flex flex-col gap-3.5">
+              {/* Primary 1-Tap GPS */}
+              <button
+                id="use-gps-btn"
+                onClick={handleGPS}
+                className="w-full flex items-center justify-center gap-2.5 bg-primary hover:bg-primary-container text-white font-bold text-sm py-4 px-5 rounded-2xl shadow-md shadow-primary/25 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  near_me
+                </span>
+                <span>Use Current Location (GPS)</span>
+              </button>
 
-                  <button
-                    id="use-gps-btn"
-                    onClick={handleGPS}
-                    className="flex items-center justify-center gap-2 bg-primary text-white font-label-lg text-label-lg py-3.5 rounded-full hover:bg-primary-container hover:shadow-[0_8px_30px_rgba(93,0,12,0.3)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-lg">my_location</span>
-                    Use My Location (GPS)
-                  </button>
+              {/* Secondary: Search Area / Saved Address Trigger */}
+              <button
+                type="button"
+                id="select-saved-location-btn"
+                onClick={() => setIsModalOpen(true)}
+                className="w-full flex items-center justify-between px-4 py-3.5 bg-stone-50 hover:bg-stone-100 rounded-2xl border-2 border-stone-200 hover:border-primary/40 text-stone-900 transition-all cursor-pointer group shadow-2xs"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-primary text-xl font-bold">search</span>
+                  <span className="text-stone-900 font-bold text-sm whitespace-nowrap">Search area or address</span>
                 </div>
-              )}
+                <span className="material-symbols-outlined text-stone-400 text-lg group-hover:translate-x-0.5 group-hover:text-primary transition-all">
+                  chevron_right
+                </span>
+              </button>
 
-              {status === 'denied' && (
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-2 bg-secondary-container/20 rounded-xl px-4 py-3 text-sm text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary text-lg">info</span>
-                    Location access was denied. Allow it in your browser then tap below.
-                  </div>
-                  <button
-                    id="retry-gps-btn"
-                    onClick={handleGPS}
-                    className="flex items-center justify-center gap-2 border-2 border-primary text-primary font-label-lg text-sm py-3 rounded-full hover:bg-primary/5 transition-all cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-lg">my_location</span>
-                    Try Again with GPS
-                  </button>
-                </div>
-              )}
-
-              <div className="relative flex items-center gap-3">
-                <div className="flex-1 h-px bg-surface-variant/40" />
-                <span className="text-xs text-on-surface-variant/60 uppercase font-semibold tracking-widest">or</span>
-                <div className="flex-1 h-px bg-surface-variant/40" />
+              {/* Subtle Divider */}
+              <div className="relative flex items-center gap-3 my-1">
+                <div className="flex-1 h-px bg-stone-200" />
+                <span className="text-[11px] text-stone-400 uppercase font-black tracking-widest">or</span>
+                <div className="flex-1 h-px bg-stone-200" />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <input
-                  id="manual-area-input"
-                  type="text"
-                  value={manualArea}
-                  onChange={e => { setManualArea(e.target.value); setManualError(''); }}
-                  placeholder="Enter your area (e.g. Sholinganallur)"
-                  className="w-full px-4 py-3 bg-surface-container-low rounded-xl border border-surface-variant/30 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-sm"
-                />
-                {manualError && <p className="text-xs text-error ml-1">{manualError}</p>}
-                <button
-                  id="check-area-btn"
-                  onClick={handleManualCheck}
-                  disabled={manualArea.trim().length < 3}
-                  className="bg-surface-container text-on-surface font-label-lg text-label-lg py-3 rounded-full border border-surface-variant/20 hover:bg-surface-container-high transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Check Availability
-                </button>
+              {/* Browse Menu First Button */}
+              <button
+                type="button"
+                id="browse-menu-skip-btn"
+                onClick={() => onConfirm({ distance: 2.0, fee: 39, locationName: 'Perungudi (Core Zone)' })}
+                className="w-full py-3 px-4 bg-primary/5 hover:bg-primary/10 border border-primary/20 hover:border-primary/30 rounded-2xl text-primary font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] shadow-2xs group"
+              >
+                <span className="material-symbols-outlined text-base group-hover:scale-110 transition-transform">restaurant_menu</span>
+                <span>Browse Menu First</span>
+                <span className="material-symbols-outlined text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+              </button>
+            </div>
+          )}
 
-                <button
-                  type="button"
-                  onClick={() => onConfirm({ distance: 2.0, fee: 39, locationName: 'Perungudi (Core Zone)' })}
-                  className="mt-2 w-full py-2.5 rounded-full border border-dashed border-primary/40 text-xs font-bold text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-sm">restaurant_menu</span>
-                  <span>Browse Menu First (Skip Location) →</span>
-                </button>
+          {/* DENIED STATE */}
+          {status === 'denied' && (
+            <div className="flex flex-col gap-3 text-center">
+              <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3.5 py-2.5 text-xs text-amber-900 text-left">
+                <span className="material-symbols-outlined text-amber-700 text-base shrink-0">info</span>
+                <span>Location permission was denied. You can search your area or try GPS again.</span>
               </div>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full bg-primary text-white font-bold text-sm py-3 rounded-full hover:bg-primary-container transition-all cursor-pointer shadow-sm"
+              >
+                Search Area Manually
+              </button>
+              <button
+                onClick={handleGPS}
+                className="w-full border border-surface-variant/30 text-on-surface font-semibold text-xs py-2.5 rounded-full hover:bg-surface-container transition-all cursor-pointer"
+              >
+                Retry GPS Access
+              </button>
             </div>
           )}
 
@@ -343,7 +300,16 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
           )}
         </div>
 
-        <p className="text-center text-xs text-on-surface-variant/50 mt-5">
+        {/* Subtle Delivery Info Note */}
+        <div className="inline-flex items-center justify-center gap-2 mt-4 text-xs text-stone-700 font-semibold text-center bg-white border border-stone-200 px-4 py-2 rounded-full shadow-2xs w-full sm:w-auto">
+          <span>Delivery from ₹39</span>
+          <span className="text-stone-300">•</span>
+          <span className="text-emerald-700 font-bold">Free delivery ₹499+</span>
+          <span className="text-stone-300">•</span>
+          <span>Min order ₹299</span>
+        </div>
+
+        <p className="text-center text-xs text-stone-500 font-medium mt-3">
           📍 Filbey — Perungudi, OMR, Chennai
         </p>
       </div>

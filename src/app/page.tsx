@@ -104,6 +104,8 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [restaurantStatus, setRestaurantStatus] = useState<OpenStatus | null>(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const heroCtaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const hasOrdered = localStorage.getItem('filbey_has_ordered');
@@ -112,6 +114,16 @@ export default function Home() {
     setMounted(true);
     const timer = setInterval(() => setRestaurantStatus(getRestaurantStatus()), 60_000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show sticky bar once user scrolls past the hero CTA buttons
+      setShowStickyBar(window.scrollY > 300);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -221,52 +233,24 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/70" />
 
           {/* Hero Content */}
-          <div className="relative z-10 text-center px-4 md:px-8 max-w-3xl mx-auto flex flex-col items-center gap-4 py-12 md:py-16">
-
-            {/* Clean Live Status Pill */}
-            {mounted && restaurantStatus && (
-              <div className="inline-flex items-center gap-2 bg-black/50 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-full text-xs text-white shadow-sm whitespace-nowrap">
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${restaurantStatus.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
-                <span className={`font-semibold ${restaurantStatus.isOpen ? 'text-emerald-300' : 'text-rose-300'}`}>
-                  {restaurantStatus.isOpen ? 'Open Now · Closes 11:30 PM' : restaurantStatus.label}
-                </span>
-                <span className="text-white/30">•</span>
-                <span className="text-white/80 font-normal">Perungudi</span>
-              </div>
-            )}
+          <div className="relative z-10 text-center px-4 md:px-8 max-w-3xl mx-auto flex flex-col items-center gap-6 py-16 md:py-24">
 
             {/* Headline - Clean 2 lines on mobile & desktop */}
-            <h1 className="font-display font-extrabold tracking-tight text-white text-shadow-hero uppercase leading-[1.08] text-3xl sm:text-5xl md:text-7xl max-w-2xl mx-auto">
+            <h1 className="font-display font-extrabold tracking-tight text-white text-shadow-hero uppercase leading-[1.08] text-4xl sm:text-6xl md:text-7xl max-w-3xl mx-auto">
               {t('home.heroTitle1')}<br />
               <span className="text-secondary-fixed-dim">{t('home.heroTitle2')}</span>
             </h1>
 
-            {/* Appetizing Subtitle & Direct Order Offer */}
-            <div className="flex flex-col items-center gap-2 max-w-md mx-auto">
-              <p className="text-white/90 text-sm md:text-base font-normal tracking-wide">
-                Signature Fried Chicken, Dynamite Burgers &amp; Thick Shakes
-              </p>
-              {mounted && isFirstOrder ? (
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 via-primary-container/40 to-amber-500/20 backdrop-blur-md border border-amber-300/40 text-amber-100 text-xs sm:text-sm px-4 py-1.5 rounded-full font-semibold shadow-sm">
-                  <span className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-sm">sell</span>
-                    ₹30 OFF First Direct Order
-                  </span>
-                  <span className="text-white/30">•</span>
-                  <span>Free Delivery ₹499+</span>
-                </div>
-              ) : (
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs sm:text-sm px-4 py-1.5 rounded-full font-medium shadow-sm">
-                  <span className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-sm">local_shipping</span>
-                    Free Delivery on orders ₹499+
-                  </span>
-                </div>
-              )}
-            </div>
+            {/* Appetizing Subtitle */}
+            <p className="text-white/90 text-base sm:text-lg md:text-xl font-normal tracking-wide max-w-xl mx-auto drop-shadow-sm">
+              Signature Fried Chicken, Dynamite Burgers &amp; Thick Shakes
+            </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-1 w-full max-w-sm sm:max-w-none">
+            {/* Primary Action Buttons */}
+            <div
+              ref={heroCtaRef}
+              className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mt-2 w-full max-w-xs sm:max-w-none"
+            >
               <Link
                 href="/order"
                 id="hero-order-now-btn"
@@ -274,7 +258,6 @@ export default function Home() {
               >
                 <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>moped</span>
                 <span>Order Online</span>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-bold ml-1">Direct Delivery</span>
               </Link>
               <Link
                 href="/menu"
@@ -284,21 +267,6 @@ export default function Home() {
                 <span>{t('nav.dineInMenu')}</span>
                 <span className="material-symbols-outlined text-sm">restaurant_menu</span>
               </Link>
-            </div>
-
-            {/* Clean Trust Strip - No Pay on Delivery, No Clutter */}
-            <div className="flex items-center justify-center gap-3 sm:gap-4 text-white/75 text-xs pt-1">
-              <span className="flex items-center gap-1 font-medium">
-                <span className="text-secondary-fixed-dim font-bold">✓</span> 100% Halal
-              </span>
-              <span className="text-white/30">•</span>
-              <span className="flex items-center gap-1 font-medium">
-                <span className="text-secondary-fixed-dim font-bold">✓</span> 30–45 Mins Delivery
-              </span>
-              <span className="text-white/30">•</span>
-              <span className="flex items-center gap-1 font-medium">
-                <span className="text-secondary-fixed-dim font-bold">✓</span> WhatsApp Order
-              </span>
             </div>
           </div>
         </section>
@@ -611,7 +579,13 @@ export default function Home() {
       <Footer />
 
       {/* ── Sticky Mobile Bottom Bar ── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-t border-surface-container-high px-4 py-3 flex items-center gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)]">
+      <div
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-t border-surface-container-high px-4 py-3 flex items-center gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out transform ${
+          showStickyBar
+            ? 'translate-y-0 opacity-100 pointer-events-auto'
+            : 'translate-y-full opacity-0 pointer-events-none'
+        }`}
+      >
         <Link
           href="tel:+918122356144"
           id="mobile-sticky-call-btn"
