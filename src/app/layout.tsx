@@ -1,8 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Outfit, Baloo_Thambi_2 } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { CartProvider } from "@/context/CartContext";
+import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
+import InstallPrompt from "@/components/pwa/InstallPrompt";
 
 const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -22,6 +24,14 @@ const balooThambi2 = Baloo_Thambi_2({
   display: "swap",
   weight: ["400", "500", "600", "700", "800"],
 });
+
+export const viewport: Viewport = {
+  themeColor: "#5d000c",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://thefilbey.com"),
@@ -66,6 +76,24 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "https://thefilbey.com/",
+  },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Filbey",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
@@ -179,6 +207,8 @@ export default function RootLayout({
         <LanguageProvider>
           <CartProvider>
             {children}
+            <InstallPrompt />
+            <ServiceWorkerRegister />
           </CartProvider>
         </LanguageProvider>
       </body>
