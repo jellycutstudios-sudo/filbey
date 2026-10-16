@@ -50,6 +50,8 @@ interface CartContextType {
   discount: number;
   gstAmount: number;
   total: number;
+  scheduledSlot: string | null;
+  setScheduledSlot: (slot: string | null) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -84,6 +86,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [isPhoneEligibleForFirstOrder, setIsPhoneEligibleForFirstOrder] = useState<boolean>(true);
   const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+  const [scheduledSlot, setScheduledSlotState] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return sessionStorage.getItem('filbey_scheduled_slot') || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const setScheduledSlot = useCallback((slot: string | null) => {
+    setScheduledSlotState(slot);
+    try {
+      if (slot) {
+        sessionStorage.setItem('filbey_scheduled_slot', slot);
+      } else {
+        sessionStorage.removeItem('filbey_scheduled_slot');
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   // Persist items
   useEffect(() => {
@@ -126,6 +147,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       sessionStorage.removeItem('filbey_cart');
       sessionStorage.removeItem('filbey_delivery');
+      sessionStorage.removeItem('filbey_scheduled_slot');
     } catch { /* ignore */ }
   }, []);
 
@@ -257,6 +279,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       discount,
       gstAmount,
       total,
+      scheduledSlot,
+      setScheduledSlot,
     }}>
       {children}
     </CartContext.Provider>

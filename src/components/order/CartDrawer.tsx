@@ -27,6 +27,7 @@ export default function CartDrawer({ open, onClose, onProceed, meetsMinOrder, mi
     isFirstOrderDiscountApplied,
     toggleFirstOrderDiscount,
     isPhoneEligibleForFirstOrder,
+    scheduledSlot,
   } = useCart();
 
   // Lock body scroll when open
@@ -219,6 +220,17 @@ export default function CartDrawer({ open, onClose, onProceed, meetsMinOrder, mi
               {totalSavings > 0 && (
                 <div className="bg-emerald-50 border border-emerald-300 rounded-xl px-3 py-1.5 text-center text-xs text-emerald-900 font-bold my-0.5">
                   🎉 Total direct savings on this order: <strong className="font-black">₹{totalSavings}</strong>
+                </div>
+              )}
+              {scheduledSlot && (
+                <div className="bg-amber-50 border-2 border-amber-300 rounded-xl px-3 py-2 text-xs text-amber-950 font-bold flex items-center justify-between gap-2 my-0.5">
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <span className="material-symbols-outlined text-amber-700 text-base shrink-0">event_available</span>
+                    <span className="truncate">Slot: {scheduledSlot}</span>
+                  </span>
+                  <span className="text-[10px] uppercase font-black bg-amber-200 text-amber-950 px-2 py-0.5 rounded-full shrink-0">
+                    Pre-Order
+                  </span>
                 </div>
               )}
               <div className="flex items-center justify-between text-base font-black text-stone-950 pt-2 border-t-2 border-stone-200">

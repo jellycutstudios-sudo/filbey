@@ -21,7 +21,8 @@ function buildWhatsAppMessage(
   discount: number,
   gstAmount: number,
   customer: CustomerDetails,
-  locationName: string
+  locationName: string,
+  scheduledSlot?: string | null
 ): string {
   const itemLines = items
     .map(i => `• ${i.quantity}x ${i.name}${i.priceLabel ? ` (${i.priceLabel})` : ''} — ₹${i.price * i.quantity}`)
@@ -35,9 +36,13 @@ function buildWhatsAppMessage(
     : `https://maps.google.com/?q=${encodeURIComponent((customer.houseFlatFloor || '') + ' ' + (customer.area || customer.address) + ', Chennai')}`;
 
   const addressTag = customer.saveAs || customer.addressType || 'Home';
+  const timingLine = scheduledSlot
+    ? `⏰ *Delivery Timing:* SCHEDULED FOR ${scheduledSlot.toUpperCase()}\n`
+    : `⚡ *Delivery Timing:* Immediate Dispatch (30–45 mins)\n`;
 
   return (
     `🍗 *New Order — Filbey Direct Delivery*\n\n` +
+    timingLine +
     `📦 *Items:*\n${itemLines}\n\n` +
     `💰 *Subtotal:* ₹${subtotal}` +
     discountStr + `\n` +
@@ -69,6 +74,7 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
     gstAmount,
     clearCart,
     recordOrderedPhone,
+    scheduledSlot,
   } = useCart();
   const locationName = deliveryInfo?.locationName ?? 'Your location';
 
@@ -83,7 +89,8 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
       discount,
       gstAmount,
       customer,
-      locationName
+      locationName,
+      scheduledSlot
     );
     const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -108,6 +115,7 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
         area: customer.area || locationName,
         total,
         items: itemsSummary,
+        scheduledSlot: scheduledSlot || '',
       }),
     }).catch(err => console.warn('Could not sync order to Google Sheet:', err));
 
@@ -205,6 +213,26 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
         </div>
 
         <div className="px-5 py-4 flex flex-col gap-3 text-sm">
+          {/* Scheduled Delivery Timing if active */}
+          {scheduledSlot && (
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-3 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="material-symbols-outlined text-amber-700 text-lg shrink-0">event_available</span>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-black uppercase text-amber-800 tracking-wider block">
+                    Scheduled Delivery Slot
+                  </span>
+                  <span className="text-xs font-black text-amber-950 truncate block">
+                    {scheduledSlot}
+                  </span>
+                </div>
+              </div>
+              <span className="text-[10px] uppercase font-black bg-amber-200 text-amber-950 px-2 py-0.5 rounded-full shrink-0">
+                Pre-Order
+              </span>
+            </div>
+          )}
+
           {/* Receiver & Phone */}
           <div className="flex items-center justify-between pb-3 border-b border-gray-100">
             <div className="flex items-center gap-2">

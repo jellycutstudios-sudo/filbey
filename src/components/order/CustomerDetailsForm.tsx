@@ -37,7 +37,7 @@ const DEFAULT_INSTRUCTION_PRESETS = [
 ];
 
 export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetailsFormProps) {
-  const { checkPhoneEligibility, isPhoneEligibleForFirstOrder, deliveryInfo } = useCart();
+  const { checkPhoneEligibility, isPhoneEligibleForFirstOrder, deliveryInfo, scheduledSlot } = useCart();
 
   // Load account or last saved profile
   const [account, setAccount] = useState<{ name: string; phone: string }>(() => {
@@ -328,6 +328,28 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
+
+          {/* ── Scheduled Delivery Notice if active ── */}
+          {scheduledSlot && (
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0 text-amber-800">
+                  <span className="material-symbols-outlined text-xl">event_available</span>
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-black uppercase text-amber-800 tracking-wider block">
+                    Scheduled Delivery Slot
+                  </span>
+                  <p className="text-sm font-black text-amber-950 truncate">
+                    {scheduledSlot}
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs uppercase font-black bg-amber-200 text-amber-950 px-2.5 py-1 rounded-full shrink-0">
+                Pre-Order
+              </span>
+            </div>
+          )}
 
           {/* ── SECTION 1: RECEIVER DETAILS (Screenshot 1) ── */}
           <div className="space-y-2">

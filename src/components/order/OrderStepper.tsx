@@ -7,6 +7,7 @@ import LocationCheck from './LocationCheck';
 import OrderMenuClient from './OrderMenuClient';
 import CustomerDetailsForm, { CustomerDetails } from './CustomerDetailsForm';
 import OrderConfirmation from './OrderConfirmation';
+import ClosedNoticeModal from './ClosedNoticeModal';
 import { getRestaurantStatus, type OpenStatus } from '@/utils/restaurantHours';
 
 type Step = 'location' | 'menu' | 'details' | 'confirm' | 'success';
@@ -14,14 +15,23 @@ type Step = 'location' | 'menu' | 'details' | 'confirm' | 'success';
 export default function OrderStepper() {
   const [step, setStep] = useState<Step>('location');
   const [customer, setCustomer] = useState<CustomerDetails | null>(null);
-  const { setDeliveryInfo } = useCart();
+  const { setDeliveryInfo, scheduledSlot, setScheduledSlot } = useCart();
   const [restaurantStatus, setRestaurantStatus] = useState<OpenStatus | null>(null);
+  const [showClosedModal, setShowClosedModal] = useState(false);
+  const [hasInteractedWithModal, setHasInteractedWithModal] = useState(false);
 
   useEffect(() => {
-    setRestaurantStatus(getRestaurantStatus());
-    const timer = setInterval(() => setRestaurantStatus(getRestaurantStatus()), 60_000);
+    const status = getRestaurantStatus();
+    setRestaurantStatus(status);
+    if (!status.isOpen && !scheduledSlot && !hasInteractedWithModal) {
+      setShowClosedModal(true);
+    }
+    const timer = setInterval(() => {
+      const updated = getRestaurantStatus();
+      setRestaurantStatus(updated);
+    }, 60_000);
     return () => clearInterval(timer);
-  }, []);
+  }, [scheduledSlot, hasInteractedWithModal]);
 
   const handleLocationConfirm = (info: DeliveryInfo) => {
     setDeliveryInfo(info);
@@ -120,55 +130,114 @@ export default function OrderStepper() {
   }
 
   return (
-    <div className="pb-8">
+    <div className="relative pb-8 min-h-screen">
 
-      {/* ── Closed Hours Banner ── */}
-      {restaurantStatus && !restaurantStatus.isOpen && (
-        <div className="max-w-md mx-auto mt-4 px-4">
-          <div className="bg-white border-2 border-amber-400 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 shrink-0 mt-1.5 animate-pulse" />
-            <div className="flex-1">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <p className="font-black text-stone-950 text-sm">We&apos;re currently closed</p>
-                <span className="text-xs font-black text-amber-950 bg-amber-100 border border-amber-400 px-2.5 py-0.5 rounded-full shadow-2xs">
-                  Opens in ~{Math.round(restaurantStatus.minutesUntilChange / 60)} hr{restaurantStatus.minutesUntilChange > 90 ? 's' : ''}
-                </span>
+      {/* ── Background Content (Blurred when Schedule Modal is Open) ── */}
+      <div className={`transition-all duration-300 ${showClosedModal ? 'filter blur-md pointer-events-none select-none' : ''}`}>
+
+        {/* ── Closed Hours & Scheduling Banner ── */}
+        {restaurantStatus && !restaurantStatus.isOpen && (
+          <div className="max-w-md mx-auto mt-3 px-4">
+            {scheduledSlot ? (
+              <div className="bg-white border-2 border-primary/40 rounded-2xl p-3.5 shadow-sm flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-xl">event_available</span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-black uppercase text-primary tracking-wider">Scheduled Delivery</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                    </div>
+                    <p className="text-xs font-black text-stone-950 truncate mt-0.5">{scheduledSlot}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowClosedModal(true)}
+                  className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-900 text-xs font-bold shrink-0 transition-colors cursor-pointer border border-stone-200"
+                >
+                  Change Slot
+                </button>
               </div>
-              <p className="text-stone-800 text-xs mt-1.5 leading-relaxed font-medium">
-                Open daily <strong className="text-stone-950 font-bold">11:30 AM – 11:30 PM</strong>. You can still browse and pre-order — we&apos;ll prepare it fresh as soon as we open!
+            ) : (
+              <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3.5 shadow-sm flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-600 shrink-0 animate-pulse" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-black text-amber-950">Currently Closed</span>
+                      {restaurantStatus.timeFormatted && (
+                        <span className="text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded-full">
+                          Opens in {restaurantStatus.timeFormatted}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-stone-700 font-medium truncate mt-0.5">
+                      Pre-order now for hot opening dispatch
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowClosedModal(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-primary text-white text-xs font-black shrink-0 shadow-xs hover:bg-primary-container transition-all cursor-pointer"
+                >
+                  Schedule
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Open Banner (closing soon) ── */}
+        {restaurantStatus?.isOpen && restaurantStatus.minutesUntilChange <= 60 && (
+          <div className="max-w-md mx-auto mt-4 px-4">
+            <div className="bg-orange-500/10 border border-orange-500/25 rounded-2xl px-4 py-3 flex items-center gap-2.5 shadow-2xs">
+              <span className="material-symbols-outlined text-orange-600 text-lg">schedule</span>
+              <p className="text-orange-950 text-xs font-semibold">
+                Closing in {restaurantStatus.minutesUntilChange} minutes — order now to avoid missing out!
               </p>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Open Banner (closing soon) ── */}
-      {restaurantStatus?.isOpen && restaurantStatus.minutesUntilChange <= 60 && (
-        <div className="max-w-md mx-auto mt-4 px-4">
-          <div className="bg-orange-500/10 border border-orange-500/25 rounded-2xl px-4 py-3 flex items-center gap-2.5 shadow-2xs">
-            <span className="material-symbols-outlined text-orange-600 text-lg">schedule</span>
-            <p className="text-orange-950 text-xs font-semibold">
-              Closing in {restaurantStatus.minutesUntilChange} minutes — order now to avoid missing out!
-            </p>
-          </div>
-        </div>
-      )}
+        {step === 'location' && <LocationCheck onConfirm={handleLocationConfirm} />}
+        {step === 'menu' && <OrderMenuClient onProceed={handleMenuProceed} />}
+        {step === 'details' && (
+          <CustomerDetailsForm
+            onSubmit={handleDetailsSubmit}
+            onBack={() => setStep('menu')}
+          />
+        )}
+        {step === 'confirm' && customer && (
+          <OrderConfirmation
+            customer={customer}
+            onBack={() => setStep('details')}
+            onOrderPlaced={handleOrderPlaced}
+          />
+        )}
+      </div>
 
-      {step === 'location' && <LocationCheck onConfirm={handleLocationConfirm} />}
-      {step === 'menu' && <OrderMenuClient onProceed={handleMenuProceed} />}
-      {step === 'details' && (
-        <CustomerDetailsForm
-          onSubmit={handleDetailsSubmit}
-          onBack={() => setStep('menu')}
-        />
-      )}
-      {step === 'confirm' && customer && (
-        <OrderConfirmation
-          customer={customer}
-          onBack={() => setStep('details')}
-          onOrderPlaced={handleOrderPlaced}
-        />
-      )}
+      {/* ── Scheduled Delivery Modal (Option 1) with Blurred Backdrop ── */}
+      <ClosedNoticeModal
+        isOpen={showClosedModal}
+        onClose={() => {
+          setShowClosedModal(false);
+          setHasInteractedWithModal(true);
+        }}
+        status={restaurantStatus}
+        currentSlot={scheduledSlot}
+        onConfirmSchedule={(slot) => {
+          setScheduledSlot(slot);
+          setShowClosedModal(false);
+          setHasInteractedWithModal(true);
+        }}
+        onBrowseOnly={() => {
+          setShowClosedModal(false);
+          setHasInteractedWithModal(true);
+        }}
+      />
     </div>
   );
 }
