@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCart } from '@/context/CartContext';
+import InstallPrompt from '@/components/pwa/InstallPrompt';
 
 const navLinks = [
   { key: 'nav.aboutUs', label: 'About Us', href: '/about' },
@@ -36,6 +37,9 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
   return (
     <>
       <header className="bg-surface/90 backdrop-blur-md fixed top-0 w-full z-50 shadow-[0_4px_12px_rgba(42,31,29,0.05)]">
+        {/* Top Smart App Download Banner for First-Time Mobile Visitors */}
+        <InstallPrompt />
+
         <div className="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
           {/* Brand */}
           <Link href="/" className="flex items-center">

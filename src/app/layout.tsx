@@ -4,7 +4,6 @@ import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { CartProvider } from "@/context/CartContext";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
-import InstallPrompt from "@/components/pwa/InstallPrompt";
 
 const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -207,7 +206,6 @@ export default function RootLayout({
         <LanguageProvider>
           <CartProvider>
             {children}
-            <InstallPrompt />
             <ServiceWorkerRegister />
           </CartProvider>
         </LanguageProvider>
