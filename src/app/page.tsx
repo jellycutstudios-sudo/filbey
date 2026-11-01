@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -558,7 +558,7 @@ export default function Home() {
                   Prefer to order by chat?
                 </h3>
                 <p className="text-white/80 text-sm md:text-base mb-4">
-                  Place your order directly on WhatsApp — quick, easy, and personal. We'll confirm your order in minutes.
+                  Place your order directly on WhatsApp — quick, easy, and personal. We&apos;ll confirm your order in minutes.
                 </p>
                 <Link
                   href="https://wa.me/918122356144"

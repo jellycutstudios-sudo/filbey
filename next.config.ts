@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['10.95.170.149', 'localhost:3000'],
   images: {
     // Allow unoptimized images from public folder (svgs etc.)
     dangerouslyAllowSVG: true,

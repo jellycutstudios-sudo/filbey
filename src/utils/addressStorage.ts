@@ -98,10 +98,10 @@ function getAllRawAddresses(): SavedAddress[] {
     if (legacy) {
       const list = JSON.parse(legacy);
       const activePhone = getActiveRegisteredPhone();
-      const migrated: SavedAddress[] = list.map((item: any) => ({
+      const migrated: SavedAddress[] = list.map((item: Partial<SavedAddress>) => ({
         ...item,
         registeredPhone: cleanPhoneNumber(item.receiverPhone) || activePhone,
-      }));
+      } as SavedAddress));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }

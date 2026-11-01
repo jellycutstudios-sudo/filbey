@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import LocationSelectModal from './LocationSelectModal';
+import MapLocationPicker from './MapLocationPicker';
 import { saveAddress, SavedAddress, getSavedAddresses } from '@/utils/addressStorage';
 
 export interface CustomerDetails {
@@ -67,6 +68,8 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
     lng: 80.2435,
   }));
   const [mapsUrl, setMapsUrl] = useState('');
+  const [hasCustomPin, setHasCustomPin] = useState(false);
+  const [isMapPickerOpen, setIsMapPickerOpen] = useState(false);
 
   const [selectedInstructions, setSelectedInstructions] = useState<string[]>([]);
   const [customInstruction, setCustomInstruction] = useState('');
@@ -92,6 +95,9 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
         if (primary.latitude && primary.longitude) {
           setCoords({ lat: primary.latitude, lng: primary.longitude });
           setMapsUrl(primary.mapsUrl || `https://maps.google.com/?q=${primary.latitude},${primary.longitude}`);
+          if (primary.latitude !== 12.9696 || primary.longitude !== 80.2435) {
+            setHasCustomPin(true);
+          }
         }
         if (primary.deliveryInstructions) {
           setSelectedInstructions([primary.deliveryInstructions]);
@@ -167,6 +173,7 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
     setArea(loc.area);
     setCoords({ lat: loc.lat, lng: loc.lng });
     setMapsUrl(loc.mapsUrl);
+    setHasCustomPin(true);
     setErrors(prev => ({ ...prev, area: '' }));
 
     if (loc.savedAddress) {
@@ -234,7 +241,6 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
 
     const finalName = useAccountDetails ? account.name.trim() : receiverName.trim();
     const finalPhone = useAccountDetails ? account.phone.trim() : receiverPhone.trim();
-    const finalMapsUrl = mapsUrl || `https://maps.google.com/?q=${coords.lat},${coords.lng}`;
     const allInstructions = selectedInstructions.join(', ');
 
     // Build combined full address string
@@ -243,6 +249,16 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
       buildingStreet.trim(),
       area.trim(),
     ].filter(Boolean).join(', ');
+
+    // Precise Google Maps Pin:
+    // If a custom pin was set or explicit mapsUrl exists without defaulting to the restaurant, use coords.
+    // Otherwise, generate a direct Google Maps search link for the customer's exact full address text.
+    const isRestaurantCoord = Math.abs(coords.lat - 12.9696) < 0.0001 && Math.abs(coords.lng - 80.2435) < 0.0001;
+    const finalMapsUrl = (mapsUrl && !mapsUrl.includes('12.9696,80.2435'))
+      ? mapsUrl
+      : (hasCustomPin && !isRestaurantCoord)
+      ? `https://maps.google.com/?q=${coords.lat},${coords.lng}`
+      : `https://maps.google.com/?q=${encodeURIComponent(fullAddress + ', Chennai')}`;
 
     // Save to Saved Addresses storage strictly under registered phone
     saveAddress({
@@ -557,33 +573,52 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
                 <div className="bg-[#F8F9FB] rounded-2xl border-2 border-gray-300 p-3.5 flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0 pr-1">
                     <div className="flex items-center gap-1.5 text-xs font-black text-gray-500 uppercase tracking-wider mb-1">
-                      <span>Verified Delivery Area</span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                      <span>{hasCustomPin ? 'GPS Pin Verified' : 'Delivery Area'}</span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${hasCustomPin ? 'bg-emerald-600' : 'bg-amber-500'}`}></span>
                     </div>
-                    <p className="text-xs font-bold text-gray-950 leading-relaxed line-clamp-3">
-                      {area || 'Tap Change on the right to select your exact delivery area'}
+                    <p className="text-xs font-bold text-gray-950 leading-relaxed line-clamp-2">
+                      {area || 'Tap on the right to set your exact doorstep pin on map'}
                     </p>
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setIsMapPickerOpen(true)}
+                        className="text-[11px] font-black text-red-600 hover:underline flex items-center gap-0.5 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-xs">pin_drop</span>
+                        <span>{hasCustomPin ? 'Adjust Pin on Map' : 'Set Pin on Map'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsLocationModalOpen(true)}
+                        className="text-[11px] font-bold text-gray-600 hover:underline cursor-pointer"
+                      >
+                        Search / Saved
+                      </button>
+                    </div>
                     {errors.area && (
                       <p className="text-xs text-red-600 font-bold mt-1">{errors.area}</p>
                     )}
                   </div>
 
-                  {/* Mini Map Thumbnail with Red Pin + "Change" button */}
+                  {/* Mini Map Thumbnail with Red Pin + "Set Pin" button */}
                   <button
                     type="button"
-                    onClick={() => setIsLocationModalOpen(true)}
+                    onClick={() => setIsMapPickerOpen(true)}
                     className="w-20 h-20 rounded-2xl bg-white border-2 border-gray-300 overflow-hidden relative shadow-xs flex flex-col items-center justify-center shrink-0 hover:border-red-600 hover:shadow-md transition-all group cursor-pointer"
-                    title="Change Location Pin"
+                    title="Open Interactive Map Pin Picker"
                   >
                     {/* Subtle map grid background */}
                     <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:8px_8px] bg-slate-100 pointer-events-none" />
                     
                     {/* Pin icon */}
-                    <div className="relative z-10 w-8 h-8 rounded-full bg-red-50 border border-red-200 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined text-xl">location_on</span>
+                    <div className={`relative z-10 w-8 h-8 rounded-full border flex items-center justify-center group-hover:scale-110 transition-transform ${hasCustomPin ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                      <span className="material-symbols-outlined text-xl">
+                        {hasCustomPin ? 'verified' : 'location_on'}
+                      </span>
                     </div>
-                    <span className="relative z-10 text-[11px] font-black text-red-600 tracking-tight mt-0.5 group-hover:underline">
-                      Change
+                    <span className={`relative z-10 text-[10px] font-black tracking-tight mt-0.5 group-hover:underline ${hasCustomPin ? 'text-emerald-700' : 'text-red-600'}`}>
+                      {hasCustomPin ? 'Pin Set ✓' : 'Set Pin'}
                     </span>
                   </button>
                 </div>
@@ -707,6 +742,24 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
             // Already on manual address form
           }}
         />
+
+        {/* Interactive Leaflet Map Picker Modal */}
+        {isMapPickerOpen && (
+          <MapLocationPicker
+            initialLat={coords.lat}
+            initialLng={coords.lng}
+            initialAddress={area}
+            onConfirm={(loc) => {
+              setIsMapPickerOpen(false);
+              setCoords({ lat: loc.lat, lng: loc.lng });
+              setArea(loc.area);
+              setMapsUrl(loc.mapsUrl);
+              setHasCustomPin(true);
+              setErrors(prev => ({ ...prev, area: '' }));
+            }}
+            onCancel={() => setIsMapPickerOpen(false)}
+          />
+        )}
       </div>
     </div>
   );

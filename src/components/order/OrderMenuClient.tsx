@@ -410,6 +410,8 @@ export default function OrderMenuClient({ onProceed }: { onProceed: () => void }
     return MENU_DATA.map(cat => ({
       ...cat,
       items: cat.items.filter(item => {
+        if (item.availableForDelivery === false) return false;
+
         const matchSearch =
           item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (item.desc?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);

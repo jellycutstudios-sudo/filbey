@@ -1,27 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { MenuItem, Category } from '@/data/menuData';
 
 export type Language = 'en' | 'ta';
-
-export interface MenuItem {
-  name: string;
-  desc?: string;
-  price?: number;
-  prices?: { label: string; price: number }[];
-  image?: string;
-  badge?: 'POPULAR' | 'SPECIAL' | 'HOT' | 'SIGNATURE' | 'BEST SELLER' | '';
-  isVeg?: boolean;
-  isSpicy?: boolean;
-  isPopular?: boolean;
-}
-
-export interface Category {
-  id: string;
-  title: string;
-  icon: string;
-  items: MenuItem[];
-}
+export type { MenuItem, Category };
 
 interface LanguageContextType {
   language: Language;

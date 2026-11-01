@@ -22,12 +22,21 @@ const CLOSE_MINUTE = 30;
 
 /** Returns the current time in IST as { hours, minutes } */
 export function getISTTime(): { hours: number; minutes: number } {
-  const now = new Date();
-  // IST = UTC + 5:30
-  const utcMs = now.getTime() + now.getTimezoneOffset() * 60_000;
-  const istMs = utcMs + 5.5 * 60 * 60_000;
-  const ist = new Date(istMs);
-  return { hours: ist.getHours(), minutes: ist.getMinutes() };
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Kolkata',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(new Date());
+    const hours = parseInt(parts.find(p => p.type === 'hour')?.value || '0', 10);
+    const minutes = parseInt(parts.find(p => p.type === 'minute')?.value || '0', 10);
+    return { hours: hours % 24, minutes };
+  } catch {
+    const now = new Date();
+    return { hours: now.getHours(), minutes: now.getMinutes() };
+  }
 }
 
 function toMinutes(hours: number, minutes: number): number {

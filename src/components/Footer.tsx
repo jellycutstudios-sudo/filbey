@@ -18,6 +18,7 @@ export default function Footer() {
             width={140}
             height={56}
             className="h-14 w-auto self-start"
+            style={{ width: 'auto', height: 'auto' }}
           />
           <p className="text-secondary-fixed font-display text-lg tracking-wide mt-2 font-semibold">
             {t('footer.tagline')}

@@ -8,6 +8,7 @@ export interface MenuItem {
   isVeg?: boolean;
   isSpicy?: boolean;
   isPopular?: boolean;
+  availableForDelivery?: boolean;
 }
 
 export interface Category {
@@ -410,6 +411,7 @@ export const MENU_DATA: Category[] = [
         price: 30,
         image: '/images/menu/hot-coffee.jpg',
         isVeg: true,
+        availableForDelivery: false,
       },
       {
         name: 'Hot Chocolate',
@@ -417,6 +419,7 @@ export const MENU_DATA: Category[] = [
         price: 90,
         image: '/images/menu/hot-chocolate.jpg',
         isVeg: true,
+        availableForDelivery: false,
       },
       {
         name: 'Lotus Biscoff Shake',

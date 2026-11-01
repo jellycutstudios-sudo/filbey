@@ -324,12 +324,19 @@ export default function MenuClient() {
 
                         {/* Order action link */}
                         <div className="mt-3 pt-2 border-t border-surface-variant/10">
-                          <Link
-                            href="/order"
-                            className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-container transition-colors"
-                          >
-                            Order this dish <span className="material-symbols-outlined text-xs">arrow_forward</span>
-                          </Link>
+                          {item.availableForDelivery === false ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-stone-500">
+                              <span className="material-symbols-outlined text-xs">storefront</span>
+                              Dine-in only
+                            </span>
+                          ) : (
+                            <Link
+                              href="/order"
+                              className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-container transition-colors"
+                            >
+                              Order this dish <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                            </Link>
+                          )}
                         </div>
                       </div>
 

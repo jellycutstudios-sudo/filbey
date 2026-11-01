@@ -31,9 +31,10 @@ function buildWhatsAppMessage(
   const deliveryStr = isFreeDelivery ? `FREE (Order above ₹499 🎉)` : `₹${effectiveDeliveryFee}`;
   const discountStr = discount > 0 ? `\n🎁 *First Direct Order Discount:* -₹${discount}` : '';
 
-  const mapsLink = customer.mapsUrl
+  const fullAddressText = [customer.houseFlatFloor, customer.buildingStreet, customer.area || customer.address].filter(Boolean).join(', ');
+  const mapsLink = (customer.mapsUrl && !customer.mapsUrl.includes('12.9696,80.2435'))
     ? customer.mapsUrl
-    : `https://maps.google.com/?q=${encodeURIComponent((customer.houseFlatFloor || '') + ' ' + (customer.area || customer.address) + ', Chennai')}`;
+    : `https://maps.google.com/?q=${encodeURIComponent(fullAddressText + ', Chennai')}`;
 
   const addressTag = customer.saveAs || customer.addressType || 'Home';
   const timingLine = scheduledSlot
@@ -77,6 +78,10 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
     scheduledSlot,
   } = useCart();
   const locationName = deliveryInfo?.locationName ?? 'Your location';
+  const fullAddressText = [customer.houseFlatFloor, customer.buildingStreet, customer.area || customer.address].filter(Boolean).join(', ');
+  const mapsLink = (customer.mapsUrl && !customer.mapsUrl.includes('12.9696,80.2435'))
+    ? customer.mapsUrl
+    : `https://maps.google.com/?q=${encodeURIComponent(fullAddressText + ', Chennai')}`;
 
   const handlePlaceOrder = () => {
     const message = buildWhatsAppMessage(
@@ -264,7 +269,7 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
               {/* Maps pin link */}
               <div className="mt-2 flex items-center gap-2">
                 <a
-                  href={customer.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent((customer.houseFlatFloor || '') + ' ' + (customer.area || customer.address) + ', Chennai')}`}
+                  href={mapsLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-emerald-800 font-extrabold hover:underline bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-300 shadow-xs"

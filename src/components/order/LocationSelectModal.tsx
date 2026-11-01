@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import MapLocationPicker from './MapLocationPicker';
 import {
   SavedAddress,
   getSavedAddresses,
@@ -66,6 +67,7 @@ export default function LocationSelectModal({
   const [activePhone, setActivePhone] = useState<string>('');
   const [phoneLookupInput, setPhoneLookupInput] = useState<string>('');
   const [isChangingPhone, setIsChangingPhone] = useState(false);
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Add Address Form State
@@ -198,27 +200,30 @@ export default function LocationSelectModal({
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
-        let detected = currentGpsAddress;
+        let detected = '';
 
-        if (!detected) {
-          try {
-            const res = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-              { headers: { 'Accept-Language': 'en' } }
-            );
-            const data = await res.json();
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          const data = await res.json();
+          if (data && data.address) {
             const parts = [
-              data.address?.road,
-              data.address?.suburb,
-              data.address?.neighbourhood,
-              data.address?.city_district || data.address?.city,
-              data.address?.state,
-              data.address?.postcode ? `${data.address.postcode}` : '',
+              data.address.building || data.address.amenity || data.address.house_number,
+              data.address.road || data.address.pedestrian,
+              data.address.suburb || data.address.neighbourhood,
+              data.address.city_district || data.address.city || 'Chennai',
+              data.address.postcode ? `PIN: ${data.address.postcode}` : '',
             ].filter(Boolean);
-            detected = parts.join(', ');
-          } catch {
-            detected = `GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            detected = parts.length > 0 ? parts.join(', ') : data.display_name;
+          } else if (data && data.display_name) {
+            detected = data.display_name;
+          } else {
+            detected = `GPS Pin: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
           }
+        } catch {
+          detected = `GPS Pin: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
         }
 
         setIsLocating(false);
@@ -232,9 +237,9 @@ export default function LocationSelectModal({
       },
       (err) => {
         setIsLocating(false);
-        alert('Please allow location permissions to use current location.');
+        alert('Please allow high-accuracy location permissions so we can pinpoint your delivery doorstep.');
       },
-      { timeout: 12000, enableHighAccuracy: true }
+      { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 }
     );
   };
 
@@ -313,6 +318,10 @@ export default function LocationSelectModal({
     }
 
     const computedFull = [newHouseFlatFloor.trim(), newBuildingStreet.trim(), newArea.trim()].filter(Boolean).join(', ');
+    const finalMapsUrl = (currentCoords && (currentCoords.lat !== 12.9696 || currentCoords.lng !== 80.2435))
+      ? `https://maps.google.com/?q=${lat},${lng}`
+      : `https://maps.google.com/?q=${encodeURIComponent(computedFull + ', Chennai')}`;
+
     const saved = saveAddress({
       tag: newTag,
       saveAs: newSaveAs.trim() || newTag,
@@ -322,7 +331,7 @@ export default function LocationSelectModal({
       fullAddress: computedFull,
       latitude: lat,
       longitude: lng,
-      mapsUrl: `https://maps.google.com/?q=${lat},${lng}`,
+      mapsUrl: finalMapsUrl,
       receiverName: newName.trim(),
       receiverPhone: cleanPh,
     }, cleanPh);
@@ -337,13 +346,34 @@ export default function LocationSelectModal({
       area: newArea.trim(),
       lat,
       lng,
-      mapsUrl: `https://maps.google.com/?q=${lat},${lng}`,
+      mapsUrl: finalMapsUrl,
       savedAddress: saved,
     });
     onClose();
   };
 
   if (!isOpen) return null;
+
+  if (showMapPicker) {
+    return (
+      <MapLocationPicker
+        initialLat={currentCoords?.lat}
+        initialLng={currentCoords?.lng}
+        initialAddress={currentGpsAddress}
+        onConfirm={(loc) => {
+          setShowMapPicker(false);
+          onSelectLocation({
+            area: loc.area,
+            lat: loc.lat,
+            lng: loc.lng,
+            mapsUrl: loc.mapsUrl,
+          });
+          onClose();
+        }}
+        onCancel={() => setShowMapPicker(false)}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col justify-end sm:justify-center items-center">
@@ -482,9 +512,19 @@ export default function LocationSelectModal({
 
               {/* Area / Locality */}
               <div>
-                <label className="block text-xs font-black text-gray-900 uppercase tracking-wider mb-1">
-                  Area / Locality <span className="text-red-600">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-black text-gray-900 uppercase tracking-wider">
+                    Area / Locality <span className="text-red-600">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowMapPicker(true)}
+                    className="text-[11px] font-black text-red-600 hover:underline flex items-center gap-0.5 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-xs">pin_drop</span>
+                    <span>Set Pin on Map</span>
+                  </button>
+                </div>
                 <input
                   type="text"
                   value={newArea}
@@ -625,7 +665,38 @@ export default function LocationSelectModal({
               {/* Primary Location Options (Screenshot 2) */}
               <div className="bg-white rounded-2xl border border-gray-300 shadow-sm overflow-hidden divide-y divide-gray-200">
                 
-                {/* 1. Use Current Location */}
+                {/* 1. Set Pin on Interactive Map (Accurate Doorstep Pinning) */}
+                <button
+                  type="button"
+                  onClick={() => setShowMapPicker(true)}
+                  className="w-full text-left p-4 hover:bg-red-50/50 transition-colors flex items-center justify-between gap-3 group cursor-pointer"
+                >
+                  <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                    <div className="w-10 h-10 rounded-full bg-red-100 border border-red-200 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-red-200 transition-colors">
+                      <span className="material-symbols-outlined text-red-600 text-2xl font-bold">
+                        map
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-black text-sm text-red-600 tracking-tight">
+                          Set pin on Interactive Map
+                        </p>
+                        <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded uppercase">
+                          Exact Pin
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-700 font-medium line-clamp-1 mt-0.5">
+                        Move the map pin right on your gate, building or flat
+                      </p>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-gray-400 group-hover:text-red-600 text-lg shrink-0">
+                    chevron_right
+                  </span>
+                </button>
+
+                {/* 2. Use Current Location */}
                 <button
                   type="button"
                   onClick={handleUseCurrentLocation}
@@ -641,11 +712,11 @@ export default function LocationSelectModal({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="font-black text-sm text-red-600 tracking-tight">
-                          {isLocating ? 'Detecting current location...' : 'Use current location'}
+                          {isLocating ? 'Detecting high-precision GPS...' : 'Use current location'}
                         </p>
                       </div>
                       <p className="text-xs text-gray-700 font-medium line-clamp-2 mt-0.5 leading-relaxed">
-                        {currentGpsAddress || 'Tap to accurately detect your exact house/building GPS coordinates'}
+                        {currentGpsAddress || 'Tap to detect your exact house/building GPS coordinates'}
                       </p>
                     </div>
                   </div>
@@ -654,7 +725,7 @@ export default function LocationSelectModal({
                   </span>
                 </button>
 
-                {/* 2. Add Address */}
+                {/* 3. Add Address */}
                 <button
                   type="button"
                   onClick={() => {
