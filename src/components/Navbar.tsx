@@ -49,7 +49,6 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
               width={144}
               height={48}
               className="h-12 w-auto"
-              style={{ width: 'auto', height: 'auto' }}
               priority
             />
           </Link>
@@ -149,7 +148,6 @@ export default function Navbar({ isMenuPage = false }: NavbarProps) {
               width={180}
               height={60}
               className="h-16 md:h-20 w-auto drop-shadow-sm"
-              style={{ width: 'auto', height: 'auto' }}
             />
           </div>
 
