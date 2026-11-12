@@ -51,9 +51,9 @@ export default function MapLocationPicker({
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
-  // Calculate distance from Filbey
+  // Calculate distance from Filbey (Max 6 km radius)
   const distanceKm = calculateDistanceKm(RESTAURANT.lat, RESTAURANT.lng, coords.lat, coords.lng);
-  const isDeliverable = distanceKm <= 15;
+  const isDeliverable = distanceKm <= 6;
 
   // Reverse geocode given lat & lng
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
@@ -175,6 +175,16 @@ export default function MapLocationPicker({
       L.marker([RESTAURANT.lat, RESTAURANT.lng], { icon: restIcon })
         .addTo(map)
         .bindPopup('<b>Filbey Restaurant</b><br/>Perungudi OMR Kitchen');
+
+      // 6 km Delivery Zone Boundary Circle
+      L.circle([RESTAURANT.lat, RESTAURANT.lng], {
+        radius: 6000, // 6 km radius
+        color: '#dc2626',
+        weight: 1.5,
+        dashArray: '5, 5',
+        fillColor: '#ef4444',
+        fillOpacity: 0.06,
+      }).addTo(map);
 
       // 2. Custom Delivery Pin Marker (Interactive & Draggable)
       const deliveryPinIcon = L.divIcon({
@@ -529,20 +539,20 @@ export default function MapLocationPicker({
             </div>
           </div>
 
-          {/* Delivery Area Warning Banner if outside 15 km */}
+          {/* Delivery Area Warning Banner if outside 6 km */}
           {!isDeliverable && (
             <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex flex-col gap-2">
               <div className="flex items-start gap-2">
                 <span className="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">location_off</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <p className="text-xs font-black text-amber-950">Outside 15 km Delivery Zone</p>
+                    <p className="text-xs font-black text-amber-950">Outside 6 km Delivery Zone</p>
                     <span className="text-[10px] font-extrabold text-amber-900 bg-amber-200/80 px-1.5 py-0.5 rounded">
-                      {formatDistance(distanceKm)} away
+                      {formatDistance(distanceKm)} away (Max 6 km)
                     </span>
                   </div>
                   <p className="text-[11px] text-amber-800 leading-tight mt-0.5">
-                    Filbey delivers within <strong>15 km</strong> of our Perungudi kitchen. Your pin is currently outside Chennai / too far for fresh hot delivery.
+                    Filbey delivers hot &amp; fresh within <strong>6 km</strong> of our Perungudi kitchen. Your pin is currently outside our 6 km delivery area.
                   </p>
                 </div>
               </div>
@@ -570,7 +580,7 @@ export default function MapLocationPicker({
               type="button"
               onClick={() => {
                 if (!isDeliverable) {
-                  alert(`⚠️ This location is ${formatDistance(distanceKm)} away from our kitchen in Perungudi, Chennai.\n\nFilbey delivers orders within 15 km. Please click "Move Pin to Perungudi Kitchen" or drag the pin into our delivery area to confirm.`);
+                  alert(`⚠️ This location is ${formatDistance(distanceKm)} away from our kitchen in Perungudi, Chennai.\n\nFilbey only delivers orders within 6 km. Please click "Move Pin to Perungudi Kitchen" or drag the pin inside our 6 km delivery zone to confirm.`);
                   return;
                 }
                 handleConfirmLocation();

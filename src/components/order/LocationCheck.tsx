@@ -22,9 +22,8 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
 
 function getDeliveryFee(km: number): number | null {
   if (km <= 3.5) return 39;
-  if (km <= 8.5) return 59;
-  if (km <= 15) return 79;
-  return null; // out of delivery range (> 15 km)
+  if (km <= 6) return 59;
+  return null; // out of delivery range (> 6 km)
 }
 
 function isOpen(): boolean {
@@ -51,8 +50,8 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
   const handleModalSelect = (loc: { area: string; lat: number; lng: number; mapsUrl: string; savedAddress?: SavedAddress }) => {
     let km = haversineKm(loc.lat, loc.lng, RESTAURANT.lat, RESTAURANT.lng);
     let fee = getDeliveryFee(km);
-    if (fee === null && km <= 15) {
-      km = Math.min(km, 8.5);
+    if (fee === null && km <= 6) {
+      km = Math.min(km, 6);
       fee = 59;
     }
     if (fee === null) {
@@ -249,7 +248,7 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
               <div>
                 <p className="font-bold text-on-surface text-lg">Outside delivery zone</p>
                 <p className="text-on-surface-variant text-sm mt-1">
-                  You&apos;re <strong>{detectedKm?.toFixed(1)} km</strong> away. We currently deliver up to 15 km along OMR &amp; nearby areas.
+                  You&apos;re <strong>{detectedKm?.toFixed(1)} km</strong> away. We currently deliver up to 6 km around our Perungudi kitchen along OMR &amp; nearby areas.
                 </p>
                 <p className="text-sm text-on-surface-variant mt-3">
                   You can still{' '}

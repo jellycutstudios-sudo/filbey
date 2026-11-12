@@ -37,15 +37,15 @@ interface LocationSelectModalProps {
   onAddNewManualAddress?: () => void;
 }
 
-// Popular quick areas around Perungudi OMR delivery zone
+// Popular quick areas around Perungudi OMR delivery zone (within 6 km radius)
 const POPULAR_AREAS = [
   { name: 'Perungudi', lat: 12.9696, lng: 80.2435, desc: 'OMR Road, Chennai 600096' },
-  { name: 'Thoraipakkam', lat: 12.9416, lng: 80.2362, desc: 'OMR, Chennai 600097' },
   { name: 'Kandanchavadi', lat: 12.9644, lng: 80.2482, desc: 'OMR, Chennai 600096' },
-  { name: 'Sholinganallur', lat: 12.9010, lng: 80.2279, desc: 'OMR Junction, Chennai 600119' },
-  { name: 'Perumbakkam', lat: 12.8985, lng: 80.1914, desc: 'Cheran Nagar / Medavakkam, Chennai 600100' },
+  { name: 'Thoraipakkam', lat: 12.9416, lng: 80.2362, desc: 'OMR, Chennai 600097' },
+  { name: 'Taramani', lat: 12.9863, lng: 80.2432, desc: 'Taramani / Ascendas IT Park, Chennai 600113' },
   { name: 'Kottivakkam', lat: 12.9734, lng: 80.2592, desc: 'ECR / OMR Link, Chennai 600041' },
   { name: 'Palavakkam', lat: 12.9620, lng: 80.2580, desc: 'ECR, Chennai 600041' },
+  { name: 'Neelankarai', lat: 12.9482, lng: 80.2584, desc: 'East Coast Road, Chennai 600115' },
   { name: 'Velachery', lat: 12.9815, lng: 80.2180, desc: 'Bypass Rd, Chennai 600042' },
 ];
 
@@ -213,11 +213,20 @@ export default function LocationSelectModal({
         );
         const data = await res.json();
         if (data && data.address) {
+          const cityOrTown =
+            data.address.city ||
+            data.address.town ||
+            data.address.village ||
+            data.address.suburb ||
+            data.address.city_district ||
+            data.address.county ||
+            data.address.state_district;
+
           const parts = [
             data.address.building || data.address.amenity || data.address.house_number,
             data.address.road || data.address.pedestrian,
-            data.address.suburb || data.address.neighbourhood,
-            data.address.city_district || data.address.city || 'Chennai',
+            data.address.neighbourhood,
+            cityOrTown,
             data.address.postcode ? `PIN: ${data.address.postcode}` : '',
           ].filter(Boolean);
           detected = parts.length > 0 ? parts.join(', ') : data.display_name;

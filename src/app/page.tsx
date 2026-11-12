@@ -508,7 +508,7 @@ export default function Home() {
                     "name": "Does Filbey deliver in Chennai?",
                     "acceptedAnswer": {
                       "@type": "Answer",
-                      "text": "Yes, Filbey delivers directly within a 5 km radius across Perungudi, Kandanchavadi, Thoraipakkam, and OMR, with free delivery on orders above ₹499."
+                      "text": "Yes, Filbey delivers directly within a 6 km radius across Perungudi, Kandanchavadi, Thoraipakkam, and OMR, with free delivery on orders above ₹499."
                     }
                   }
                 ]
