@@ -98,7 +98,10 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
       scheduledSlot
     );
     const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    const opened = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!opened || opened.closed || typeof opened.closed === 'undefined') {
+      window.location.href = url;
+    }
 
     // Record phone number so repeat orders from this number detect it
     recordOrderedPhone(customer.phone, customer.name, customer.address);

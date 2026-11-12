@@ -212,6 +212,13 @@ export default function MapLocationPicker({
       mapInstanceRef.current = map;
       setIsMapReady(true);
 
+      // Invalidate size after modal render to guarantee full tile coverage
+      setTimeout(() => {
+        if (!isCancelled && mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 250);
+
       // Initial reverse geocode
       triggerGeocode(coords.lat, coords.lng);
     };

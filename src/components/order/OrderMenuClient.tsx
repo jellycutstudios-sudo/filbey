@@ -395,6 +395,20 @@ export default function OrderMenuClient({ onProceed }: { onProceed: () => void }
         ? `${loc.savedAddress.saveAs} (${loc.savedAddress.houseFlatFloor})`
         : loc.area,
     });
+
+    try {
+      const existing = localStorage.getItem('filbey_customer');
+      const parsed = existing ? JSON.parse(existing) : {};
+      localStorage.setItem('filbey_customer', JSON.stringify({
+        ...parsed,
+        address: loc.savedAddress?.area || loc.area,
+        buildingDetails: loc.savedAddress?.houseFlatFloor || parsed.buildingDetails || '',
+        landmark: loc.savedAddress?.buildingStreet || parsed.landmark || '',
+        latitude: loc.lat,
+        longitude: loc.lng,
+        mapsUrl: loc.mapsUrl,
+      }));
+    } catch { /* ignore */ }
   };
 
   const toggleCategory = (catId: string) => {
