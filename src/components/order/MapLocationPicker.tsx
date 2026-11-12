@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { calculateDistanceKm, formatDistance } from '@/utils/addressStorage';
+import { calculateDistanceKm, formatDistance, RESTAURANT_COORDS } from '@/utils/addressStorage';
 
-const RESTAURANT = { lat: 12.9696, lng: 80.2435, name: 'Filbey Restaurant, Perungudi' };
+const RESTAURANT = RESTAURANT_COORDS;
 
 interface MapLocationPickerProps {
   initialLat?: number;
@@ -36,10 +36,10 @@ export default function MapLocationPicker({
   const mapInstanceRef = useRef<any>(null);
   const deliveryMarkerRef = useRef<any>(null);
 
-  // Center coordinates (starts with initial or Perungudi)
+  // Center coordinates (starts with initial or Filbey kitchen)
   const [coords, setCoords] = useState<{ lat: number; lng: number }>(() => ({
-    lat: initialLat && initialLat !== 12.9696 ? initialLat : 12.9696,
-    lng: initialLng && initialLng !== 80.2435 ? initialLng : 80.2435,
+    lat: initialLat && Math.abs(initialLat - RESTAURANT.lat) > 0.0001 ? initialLat : RESTAURANT.lat,
+    lng: initialLng && Math.abs(initialLng - RESTAURANT.lng) > 0.0001 ? initialLng : RESTAURANT.lng,
   }));
 
   const [address, setAddress] = useState<string>(initialAddress || 'Locating pin position...');

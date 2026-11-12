@@ -13,6 +13,7 @@ import {
   cleanPhoneNumber,
   getActiveRegisteredPhone,
   setActiveRegisteredPhone,
+  RESTAURANT_COORDS,
 } from '@/utils/addressStorage';
 
 interface LocationResult {
@@ -39,7 +40,7 @@ interface LocationSelectModalProps {
 
 // Popular quick areas around Perungudi OMR delivery zone (within 6 km radius)
 const POPULAR_AREAS = [
-  { name: 'Perungudi', lat: 12.9696, lng: 80.2435, desc: 'OMR Road, Chennai 600096' },
+  { name: 'Perungudi (Filbey)', lat: 12.959542, lng: 80.244252, desc: '2nd Main Rd, Perungudi, Chennai 600096' },
   { name: 'Kandanchavadi', lat: 12.9644, lng: 80.2482, desc: 'OMR, Chennai 600096' },
   { name: 'Thoraipakkam', lat: 12.9416, lng: 80.2362, desc: 'OMR, Chennai 600097' },
   { name: 'Taramani', lat: 12.9863, lng: 80.2432, desc: 'Taramani / Ascendas IT Park, Chennai 600113' },
@@ -296,9 +297,9 @@ export default function LocationSelectModal({
   const handleSelectSaved = (saved: SavedAddress) => {
     onSelectLocation({
       area: saved.area,
-      lat: saved.latitude || 12.9696,
-      lng: saved.longitude || 80.2435,
-      mapsUrl: saved.mapsUrl || `https://maps.google.com/?q=${saved.latitude || 12.9696},${saved.longitude || 80.2435}`,
+      lat: saved.latitude || RESTAURANT_COORDS.lat,
+      lng: saved.longitude || RESTAURANT_COORDS.lng,
+      mapsUrl: saved.mapsUrl || `https://maps.google.com/?q=${saved.latitude || RESTAURANT_COORDS.lat},${saved.longitude || RESTAURANT_COORDS.lng}`,
       savedAddress: saved,
     });
     onClose();
@@ -343,8 +344,8 @@ export default function LocationSelectModal({
 
     setIsSavingNewAddress(true);
 
-    let lat = 12.9696;
-    let lng = 80.2435;
+    let lat = RESTAURANT_COORDS.lat;
+    let lng = RESTAURANT_COORDS.lng;
     const match = POPULAR_AREAS.find(p =>
       p.name.toLowerCase() === newArea.trim().toLowerCase() ||
       newArea.toLowerCase().includes(p.name.toLowerCase())
@@ -358,7 +359,7 @@ export default function LocationSelectModal({
     }
 
     const computedFull = [newHouseFlatFloor.trim(), newBuildingStreet.trim(), newArea.trim()].filter(Boolean).join(', ');
-    const finalMapsUrl = (lat !== 12.9696 || lng !== 80.2435)
+    const finalMapsUrl = (Math.abs(lat - RESTAURANT_COORDS.lat) > 0.0001 || Math.abs(lng - RESTAURANT_COORDS.lng) > 0.0001)
       ? `https://www.google.com/maps/dir/?api=1&destination=${lat.toFixed(6)},${lng.toFixed(6)}`
       : `https://maps.google.com/?q=${encodeURIComponent(computedFull + ', Chennai')}`;
 

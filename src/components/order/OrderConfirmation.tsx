@@ -2,6 +2,7 @@
 
 import { useCart } from '@/context/CartContext';
 import { CustomerDetails } from './CustomerDetailsForm';
+import { RESTAURANT_COORDS } from '@/utils/addressStorage';
 
 interface OrderConfirmationProps {
   customer: CustomerDetails;
@@ -36,7 +37,7 @@ function buildWhatsAppMessage(
   const hasCoords = Boolean(
     customer.latitude &&
     customer.longitude &&
-    !(Math.abs(customer.latitude - 12.9696) < 0.0001 && Math.abs(customer.longitude - 80.2435) < 0.0001)
+    !(Math.abs(customer.latitude - RESTAURANT_COORDS.lat) < 0.0001 && Math.abs(customer.longitude - RESTAURANT_COORDS.lng) < 0.0001)
   );
 
   const navigationUrl = hasCoords
@@ -96,12 +97,12 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
   const hasCoords = Boolean(
     customer.latitude &&
     customer.longitude &&
-    !(Math.abs(customer.latitude - 12.9696) < 0.0001 && Math.abs(customer.longitude - 80.2435) < 0.0001)
+    !(Math.abs(customer.latitude - RESTAURANT_COORDS.lat) < 0.0001 && Math.abs(customer.longitude - RESTAURANT_COORDS.lng) < 0.0001)
   );
 
   const mapsLink = hasCoords
     ? `https://www.google.com/maps/dir/?api=1&destination=${customer.latitude!.toFixed(6)},${customer.longitude!.toFixed(6)}`
-    : (customer.mapsUrl && !customer.mapsUrl.includes('12.9696,80.2435')
+    : (customer.mapsUrl && !customer.mapsUrl.includes('12.959542,80.244252') && !customer.mapsUrl.includes('12.9696,80.2435')
       ? customer.mapsUrl
       : `https://maps.google.com/?q=${encodeURIComponent(fullAddressText + ', Chennai')}`);
 

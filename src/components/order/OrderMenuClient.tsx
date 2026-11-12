@@ -5,7 +5,7 @@ import { MENU_DATA, MenuItem } from '@/data/menuData';
 import { useCart } from '@/context/CartContext';
 import CartDrawer from './CartDrawer';
 import LocationSelectModal from './LocationSelectModal';
-import { SavedAddress, getActiveRegisteredPhone } from '@/utils/addressStorage';
+import { SavedAddress, getActiveRegisteredPhone, RESTAURANT_COORDS, calculateDistanceKm } from '@/utils/addressStorage';
 
 // Swiggy / Zomato Style Customisation Modal for Multi-portion Dishes
 function CustomisationModal({
@@ -378,15 +378,7 @@ export default function OrderMenuClient({ onProceed }: { onProceed: () => void }
   const MIN_ORDER = 149;
 
   const handleLocationSelect = (loc: { area: string; lat: number; lng: number; mapsUrl: string; savedAddress?: SavedAddress }) => {
-    const R = 6371;
-    const dLat = ((loc.lat - 12.9696) * Math.PI) / 180;
-    const dLng = ((loc.lng - 80.2435) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos((12.9696 * Math.PI) / 180) *
-        Math.cos((loc.lat * Math.PI) / 180) *
-        Math.sin(dLng / 2) ** 2;
-    let km = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const km = calculateDistanceKm(RESTAURANT_COORDS.lat, RESTAURANT_COORDS.lng, loc.lat, loc.lng);
     let fee = km <= 3.5 ? 39 : 59;
     setDeliveryInfo({
       distance: km,

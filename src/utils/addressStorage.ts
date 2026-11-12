@@ -19,7 +19,7 @@ export interface SavedAddress {
 const STORAGE_KEY = 'filbey_saved_addresses_v3';
 const LEGACY_STORAGE_KEY = 'filbey_saved_addresses_v2';
 const REGISTERED_PHONE_KEY = 'filbey_registered_phone';
-const RESTAURANT_COORDS = { lat: 12.9696, lng: 80.2435 }; // Perungudi, OMR, Chennai
+export const RESTAURANT_COORDS = { lat: 12.959542, lng: 80.244252, name: 'Filbey Restaurant, Perungudi, OMR' }; // Exact Google Maps location: 2nd Main Rd, Perungudi
 
 /** Normalize phone to 10 digits */
 export function cleanPhoneNumber(raw?: string | null): string {

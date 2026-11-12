@@ -132,8 +132,8 @@ const restaurantJsonLd = {
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: 12.9696,
-    longitude: 80.2435,
+    latitude: 12.959542,
+    longitude: 80.244252,
   },
   areaServed: [
     { "@type": "Place", name: "Perungudi, Chennai" },

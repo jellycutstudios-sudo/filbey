@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import LocationSelectModal from './LocationSelectModal';
 import MapLocationPicker from './MapLocationPicker';
-import { saveAddress, SavedAddress, getSavedAddresses } from '@/utils/addressStorage';
+import { saveAddress, SavedAddress, getSavedAddresses, RESTAURANT_COORDS } from '@/utils/addressStorage';
 
 export interface CustomerDetails {
   name: string;
@@ -64,9 +64,13 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
   const [saveAs, setSaveAs] = useState('Home');
 
   // Initialize coords from deliveryInfo if already selected in LocationCheck
-  const initialLat = deliveryInfo?.lat && deliveryInfo.lat !== 12.9696 ? deliveryInfo.lat : 12.9696;
-  const initialLng = deliveryInfo?.lng && deliveryInfo.lng !== 80.2435 ? deliveryInfo.lng : 80.2435;
-  const hasDeliveryCoords = Boolean(deliveryInfo?.lat && (deliveryInfo.lat !== 12.9696 || deliveryInfo.lng !== 80.2435));
+  const initialLat = deliveryInfo?.lat && Math.abs(deliveryInfo.lat - RESTAURANT_COORDS.lat) > 0.0001 ? deliveryInfo.lat : RESTAURANT_COORDS.lat;
+  const initialLng = deliveryInfo?.lng && Math.abs(deliveryInfo.lng - RESTAURANT_COORDS.lng) > 0.0001 ? deliveryInfo.lng : RESTAURANT_COORDS.lng;
+  const hasDeliveryCoords = Boolean(
+    deliveryInfo?.lat != null &&
+    deliveryInfo?.lng != null &&
+    (Math.abs(deliveryInfo.lat - RESTAURANT_COORDS.lat) > 0.0001 || Math.abs(deliveryInfo.lng - RESTAURANT_COORDS.lng) > 0.0001)
+  );
 
   const [coords, setCoords] = useState<{ lat: number; lng: number }>(() => ({
     lat: initialLat,
@@ -100,7 +104,7 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
         if (primary.latitude && primary.longitude) {
           setCoords({ lat: primary.latitude, lng: primary.longitude });
           setMapsUrl(primary.mapsUrl || `https://maps.google.com/?q=${primary.latitude},${primary.longitude}`);
-          if (primary.latitude !== 12.9696 || primary.longitude !== 80.2435) {
+          if (Math.abs(primary.latitude - RESTAURANT_COORDS.lat) > 0.0001 || Math.abs(primary.longitude - RESTAURANT_COORDS.lng) > 0.0001) {
             setHasCustomPin(true);
           }
         }
@@ -244,7 +248,7 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
       return;
     }
 
-    const isRestaurantCoord = Math.abs(coords.lat - 12.9696) < 0.0001 && Math.abs(coords.lng - 80.2435) < 0.0001;
+    const isRestaurantCoord = Math.abs(coords.lat - RESTAURANT_COORDS.lat) < 0.0001 && Math.abs(coords.lng - RESTAURANT_COORDS.lng) < 0.0001;
     if (!hasCustomPin || isRestaurantCoord) {
       setIsMapPickerOpen(true);
       alert('📍 Please tap your exact building gate on the map so our delivery rider navigates directly to your doorstep.');

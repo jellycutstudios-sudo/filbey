@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { DeliveryInfo } from '@/context/CartContext';
 import LocationSelectModal from './LocationSelectModal';
-import { SavedAddress, getActiveRegisteredPhone } from '@/utils/addressStorage';
+import { SavedAddress, getActiveRegisteredPhone, RESTAURANT_COORDS } from '@/utils/addressStorage';
 
-// Restaurant anchor point
-const RESTAURANT = { lat: 12.9696, lng: 80.2435, name: 'Perungudi, OMR' };
+// Restaurant anchor point (Exact Google Maps location)
+const RESTAURANT = RESTAURANT_COORDS;
 const MIN_ORDER = 299;
 
 /** Haversine distance in km between two lat/lng pairs */
