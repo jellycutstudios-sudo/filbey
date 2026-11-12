@@ -65,11 +65,21 @@ export default function MapLocationPicker({
       );
       const data = await res.json();
       if (data && data.address) {
+        const cityOrTown =
+          data.address.city ||
+          data.address.town ||
+          data.address.village ||
+          data.address.suburb ||
+          data.address.city_district ||
+          data.address.county ||
+          data.address.state_district;
+
         const parts = [
           data.address.building || data.address.amenity || data.address.house_number,
           data.address.road || data.address.pedestrian,
-          data.address.suburb || data.address.neighbourhood || data.address.residential,
-          data.address.city_district || data.address.city || 'Chennai',
+          data.address.neighbourhood || data.address.residential,
+          cityOrTown,
+          data.address.state ? data.address.state : '',
           data.address.postcode ? `PIN: ${data.address.postcode}` : '',
         ].filter(Boolean);
 
@@ -354,6 +364,20 @@ export default function MapLocationPicker({
     triggerGeocode(lat, lon);
   };
 
+  const handleJumpToKitchen = () => {
+    const lat = RESTAURANT.lat;
+    const lng = RESTAURANT.lng;
+    setCoords({ lat, lng });
+    setGpsAccuracy(null);
+    if (deliveryMarkerRef.current) {
+      deliveryMarkerRef.current.setLatLng([lat, lng]);
+    }
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.flyTo([lat, lng], 16, { animate: true, duration: 1 });
+    }
+    triggerGeocode(lat, lng);
+  };
+
   const handleConfirmLocation = () => {
     const mapsUrl = `https://maps.google.com/?q=${coords.lat},${coords.lng}`;
     onConfirm({
@@ -505,6 +529,34 @@ export default function MapLocationPicker({
             </div>
           </div>
 
+          {/* Delivery Area Warning Banner if outside 15 km */}
+          {!isDeliverable && (
+            <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex flex-col gap-2">
+              <div className="flex items-start gap-2">
+                <span className="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">location_off</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-1">
+                    <p className="text-xs font-black text-amber-950">Outside 15 km Delivery Zone</p>
+                    <span className="text-[10px] font-extrabold text-amber-900 bg-amber-200/80 px-1.5 py-0.5 rounded">
+                      {formatDistance(distanceKm)} away
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-amber-800 leading-tight mt-0.5">
+                    Filbey delivers within <strong>15 km</strong> of our Perungudi kitchen. Your pin is currently outside Chennai / too far for fresh hot delivery.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleJumpToKitchen}
+                className="w-full bg-stone-900 hover:bg-stone-800 active:scale-98 text-white rounded-lg py-2 px-3 text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+              >
+                <span className="material-symbols-outlined text-sm text-amber-400">near_me</span>
+                <span>Move Pin to Perungudi Kitchen / Chennai</span>
+              </button>
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex items-center gap-2 pt-1">
             <button
@@ -516,12 +568,24 @@ export default function MapLocationPicker({
             </button>
             <button
               type="button"
-              onClick={handleConfirmLocation}
-              disabled={!isDeliverable || isReverseGeocoding}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 px-4 text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50"
+              onClick={() => {
+                if (!isDeliverable) {
+                  alert(`⚠️ This location is ${formatDistance(distanceKm)} away from our kitchen in Perungudi, Chennai.\n\nFilbey delivers orders within 15 km. Please click "Move Pin to Perungudi Kitchen" or drag the pin into our delivery area to confirm.`);
+                  return;
+                }
+                handleConfirmLocation();
+              }}
+              disabled={isReverseGeocoding}
+              className={`flex-1 rounded-xl py-3 px-4 text-xs font-black uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer disabled:opacity-50 ${
+                isDeliverable
+                  ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-200'
+                  : 'bg-stone-300 hover:bg-stone-400 text-stone-700'
+              }`}
             >
-              <span>Confirm &amp; Use Pin</span>
-              <span className="material-symbols-outlined text-sm font-bold">check_circle</span>
+              <span>{isDeliverable ? 'Confirm & Use Pin' : `Too Far (${formatDistance(distanceKm)})`}</span>
+              <span className="material-symbols-outlined text-sm font-bold">
+                {isDeliverable ? 'check_circle' : 'block'}
+              </span>
             </button>
           </div>
         </div>
