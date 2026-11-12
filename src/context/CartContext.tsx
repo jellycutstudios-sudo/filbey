@@ -17,6 +17,10 @@ export interface DeliveryInfo {
   distance: number; // km
   fee: number; // ₹
   locationName: string;
+  lat?: number;
+  lng?: number;
+  mapsUrl?: string;
+  address?: string;
 }
 
 export const FREE_DELIVERY_THRESHOLD = 499;

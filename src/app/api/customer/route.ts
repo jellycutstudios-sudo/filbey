@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, phone, address, buildingDetails, landmark, area, total, items } = body;
+    const { name, phone, address, buildingDetails, landmark, area, total, items, mapsUrl } = body;
 
     const cleanPhone = String(phone || '').replace(/\D/g, '').slice(-10);
     const webhookUrl = process.env.GOOGLE_SHEET_WEBHOOK_URL;
@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
       address || '',
       buildingDetails ? `Flat/Floor/Bldg: ${buildingDetails}` : '',
       landmark ? `Gate/Landmark: ${landmark}` : '',
+      mapsUrl ? `Maps: ${mapsUrl}` : '',
     ].filter(Boolean).join(' | ');
 
     // Forward to Google Apps Script Webhook

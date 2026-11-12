@@ -42,6 +42,8 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
   const [status, setStatus] = useState<Status>('idle');
   const [detectedKm, setDetectedKm] = useState<number | null>(null);
   const [detectedFee, setDetectedFee] = useState<number | null>(null);
+  const [detectedCoords, setDetectedCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [detectedAddress, setDetectedAddress] = useState<string>('');
   const [manualArea, setManualArea] = useState('');
   const [manualError, setManualError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,6 +66,10 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
         locationName: loc.savedAddress?.saveAs
           ? `${loc.savedAddress.saveAs} (${loc.savedAddress.houseFlatFloor})`
           : loc.area,
+        lat: loc.lat,
+        lng: loc.lng,
+        mapsUrl: loc.mapsUrl,
+        address: loc.area,
       });
     }
   };
@@ -72,10 +78,24 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
     if (!navigator.geolocation) { setStatus('denied'); return; }
     setStatus('loading');
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const km = haversineKm(pos.coords.latitude, pos.coords.longitude, RESTAURANT.lat, RESTAURANT.lng);
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const km = haversineKm(lat, lng, RESTAURANT.lat, RESTAURANT.lng);
         const fee = getDeliveryFee(km);
         setDetectedKm(km);
+        setDetectedCoords({ lat, lng });
+
+        // Reverse geocode to get the actual street/area
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`);
+          const data = await res.json();
+          if (data && data.address) {
+            const areaName = data.address.suburb || data.address.neighbourhood || data.address.road || data.address.city_district || 'Perungudi';
+            setDetectedAddress(`${areaName}, Chennai`);
+          }
+        } catch { /* ignore */ }
+
         if (fee === null) {
           setStatus('out-of-range');
         } else {
@@ -84,7 +104,7 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
         }
       },
       () => setStatus('denied'),
-      { timeout: 10000 }
+      { timeout: 10000, enableHighAccuracy: true }
     );
   };
 
@@ -96,17 +116,30 @@ export default function LocationCheck({ onConfirm }: LocationCheckProps) {
 
   const confirmManual = () => {
     // Manual entry – assume ~3.5km (mid-range tier 2) so we charge ₹59
-    onConfirm({ distance: 3.5, fee: 59, locationName: manualArea.trim() });
+    onConfirm({ distance: 3.5, fee: 59, locationName: manualArea.trim(), address: manualArea.trim() });
   };
 
   const confirmGPS = () => {
-    onConfirm({ distance: detectedKm!, fee: detectedFee!, locationName: 'Your location' });
+    const lat = detectedCoords?.lat || RESTAURANT.lat;
+    const lng = detectedCoords?.lng || RESTAURANT.lng;
+    const mapsUrl = `https://maps.google.com/?q=${lat.toFixed(6)},${lng.toFixed(6)}`;
+    onConfirm({
+      distance: detectedKm!,
+      fee: detectedFee!,
+      locationName: detectedAddress || 'Your location',
+      lat,
+      lng,
+      mapsUrl,
+      address: detectedAddress || '',
+    });
   };
 
   const reset = () => {
     setStatus('idle');
     setDetectedKm(null);
     setDetectedFee(null);
+    setDetectedCoords(null);
+    setDetectedAddress('');
   };
 
   return (

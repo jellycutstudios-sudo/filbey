@@ -387,13 +387,17 @@ export default function OrderMenuClient({ onProceed }: { onProceed: () => void }
         Math.cos((loc.lat * Math.PI) / 180) *
         Math.sin(dLng / 2) ** 2;
     let km = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    let fee = km <= 3.5 ? 39 : km <= 8.5 ? 59 : 79;
+    let fee = km <= 3.5 ? 39 : 59;
     setDeliveryInfo({
       distance: km,
       fee,
       locationName: loc.savedAddress?.saveAs
         ? `${loc.savedAddress.saveAs} (${loc.savedAddress.houseFlatFloor})`
         : loc.area,
+      lat: loc.lat,
+      lng: loc.lng,
+      mapsUrl: loc.mapsUrl,
+      address: loc.area,
     });
 
     try {

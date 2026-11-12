@@ -358,8 +358,8 @@ export default function LocationSelectModal({
     }
 
     const computedFull = [newHouseFlatFloor.trim(), newBuildingStreet.trim(), newArea.trim()].filter(Boolean).join(', ');
-    const finalMapsUrl = (currentCoords && (currentCoords.lat !== 12.9696 || currentCoords.lng !== 80.2435))
-      ? `https://maps.google.com/?q=${lat},${lng}`
+    const finalMapsUrl = (lat !== 12.9696 || lng !== 80.2435)
+      ? `https://www.google.com/maps/dir/?api=1&destination=${lat.toFixed(6)},${lng.toFixed(6)}`
       : `https://maps.google.com/?q=${encodeURIComponent(computedFull + ', Chennai')}`;
 
     const saved = saveAddress({

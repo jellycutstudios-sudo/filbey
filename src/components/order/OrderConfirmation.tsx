@@ -32,9 +32,20 @@ function buildWhatsAppMessage(
   const discountStr = discount > 0 ? `\n🎁 *First Direct Order Discount:* -₹${discount}` : '';
 
   const fullAddressText = [customer.houseFlatFloor, customer.buildingStreet, customer.area || customer.address].filter(Boolean).join(', ');
-  const mapsLink = (customer.mapsUrl && !customer.mapsUrl.includes('12.9696,80.2435'))
-    ? customer.mapsUrl
-    : `https://maps.google.com/?q=${encodeURIComponent(fullAddressText + ', Chennai')}`;
+  
+  const hasCoords = Boolean(
+    customer.latitude &&
+    customer.longitude &&
+    !(Math.abs(customer.latitude - 12.9696) < 0.0001 && Math.abs(customer.longitude - 80.2435) < 0.0001)
+  );
+
+  const navigationUrl = hasCoords
+    ? `https://www.google.com/maps/dir/?api=1&destination=${customer.latitude!.toFixed(6)},${customer.longitude!.toFixed(6)}`
+    : (customer.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(fullAddressText + ', Chennai')}`);
+
+  const pinUrl = hasCoords
+    ? `https://maps.google.com/?q=${customer.latitude!.toFixed(6)},${customer.longitude!.toFixed(6)}`
+    : null;
 
   const addressTag = customer.saveAs || customer.addressType || 'Home';
   const timingLine = scheduledSlot
@@ -54,7 +65,9 @@ function buildWhatsAppMessage(
     `🚪 *Flat / Floor / House:* ${customer.houseFlatFloor || customer.address}\n` +
     (customer.buildingStreet ? `🏢 *Landmark / Gate:* ${customer.buildingStreet}\n` : '') +
     `🏙️ *Area:* ${customer.area || locationName}\n` +
-    `🗺️ *Rider Navigation Pin:* ${mapsLink}\n\n` +
+    `🛵 *Turn-by-Turn GPS Navigation:* ${navigationUrl}\n` +
+    (pinUrl ? `📌 *Exact Doorstep Pin:* ${pinUrl}\n` : '') +
+    `\n` +
     (customer.deliveryInstructions ? `📝 *Rider Instructions:* ${customer.deliveryInstructions}\n` : '') +
     `👤 *Receiver:* ${customer.name}\n` +
     `📞 *Phone:* +91 ${customer.phone}\n` +
@@ -79,9 +92,18 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
   } = useCart();
   const locationName = deliveryInfo?.locationName ?? 'Your location';
   const fullAddressText = [customer.houseFlatFloor, customer.buildingStreet, customer.area || customer.address].filter(Boolean).join(', ');
-  const mapsLink = (customer.mapsUrl && !customer.mapsUrl.includes('12.9696,80.2435'))
-    ? customer.mapsUrl
-    : `https://maps.google.com/?q=${encodeURIComponent(fullAddressText + ', Chennai')}`;
+  
+  const hasCoords = Boolean(
+    customer.latitude &&
+    customer.longitude &&
+    !(Math.abs(customer.latitude - 12.9696) < 0.0001 && Math.abs(customer.longitude - 80.2435) < 0.0001)
+  );
+
+  const mapsLink = hasCoords
+    ? `https://www.google.com/maps/dir/?api=1&destination=${customer.latitude!.toFixed(6)},${customer.longitude!.toFixed(6)}`
+    : (customer.mapsUrl && !customer.mapsUrl.includes('12.9696,80.2435')
+      ? customer.mapsUrl
+      : `https://maps.google.com/?q=${encodeURIComponent(fullAddressText + ', Chennai')}`);
 
   const handlePlaceOrder = () => {
     const message = buildWhatsAppMessage(
@@ -124,6 +146,7 @@ export default function OrderConfirmation({ customer, onBack, onOrderPlaced }: O
         total,
         items: itemsSummary,
         scheduledSlot: scheduledSlot || '',
+        mapsUrl: mapsLink,
       }),
     }).catch(err => console.warn('Could not sync order to Google Sheet:', err));
 

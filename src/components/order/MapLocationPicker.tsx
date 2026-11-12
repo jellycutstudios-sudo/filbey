@@ -328,13 +328,15 @@ export default function MapLocationPicker({
     if (!q) return;
 
     // Check if user pasted coordinates or a Google Maps link with coordinates
-    const coordMatch = q.match(/(-?\d+\.\d{3,})[,\s]+(-?\d+\.\d{3,})/);
-    if (coordMatch) {
-      const lat = parseFloat(coordMatch[1]);
-      const lon = parseFloat(coordMatch[2]);
+    const urlCoordMatch = q.match(/[?&](?:q|destination|ll)=(-?\d{1,2}\.\d{3,}),(-?\d{1,3}\.\d{3,})/) ||
+                          q.match(/@(-?\d{1,2}\.\d{3,}),(-?\d{1,3}\.\d{3,})/) ||
+                          q.match(/(-?\d{1,2}\.\d{3,})[,\s]+(-?\d{1,3}\.\d{3,})/);
+    if (urlCoordMatch) {
+      const lat = parseFloat(urlCoordMatch[1]);
+      const lon = parseFloat(urlCoordMatch[2]);
       if (lat > 8 && lat < 15 && lon > 78 && lon < 82) {
         setCoords({ lat, lng: lon });
-        setGpsAccuracy(5);
+        setGpsAccuracy(3);
         if (deliveryMarkerRef.current) deliveryMarkerRef.current.setLatLng([lat, lon]);
         if (mapInstanceRef.current) mapInstanceRef.current.flyTo([lat, lon], 18, { animate: true, duration: 1 });
         triggerGeocode(lat, lon);
@@ -497,6 +499,14 @@ export default function MapLocationPicker({
             </span>
           )}
         </div>
+
+        {/* If coarse GPS (e.g. desktop Wi-Fi / cell tower), show clear guidance */}
+        {gpsAccuracy !== null && gpsAccuracy > 30 && (
+          <div className="bg-amber-100/95 text-amber-950 px-3 py-1.5 text-[11px] font-bold border-b border-amber-300 flex items-center gap-1.5 z-10 shrink-0">
+            <span className="material-symbols-outlined text-xs text-amber-700 shrink-0">info</span>
+            <span>Coarse GPS (±{gpsAccuracy}m) — Please tap or drag the pin directly onto your building gate for 100% accuracy.</span>
+          </div>
+        )}
 
         {/* Interactive Map Canvas */}
         <div className="relative flex-1 w-full bg-slate-100 overflow-hidden">

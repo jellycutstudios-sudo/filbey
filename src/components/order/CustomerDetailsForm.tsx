@@ -63,12 +63,17 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
   const [area, setArea] = useState(() => deliveryInfo?.locationName || 'Perungudi, OMR, Chennai, Tamil Nadu 600096');
   const [saveAs, setSaveAs] = useState('Home');
 
+  // Initialize coords from deliveryInfo if already selected in LocationCheck
+  const initialLat = deliveryInfo?.lat && deliveryInfo.lat !== 12.9696 ? deliveryInfo.lat : 12.9696;
+  const initialLng = deliveryInfo?.lng && deliveryInfo.lng !== 80.2435 ? deliveryInfo.lng : 80.2435;
+  const hasDeliveryCoords = Boolean(deliveryInfo?.lat && (deliveryInfo.lat !== 12.9696 || deliveryInfo.lng !== 80.2435));
+
   const [coords, setCoords] = useState<{ lat: number; lng: number }>(() => ({
-    lat: 12.9696,
-    lng: 80.2435,
+    lat: initialLat,
+    lng: initialLng,
   }));
-  const [mapsUrl, setMapsUrl] = useState('');
-  const [hasCustomPin, setHasCustomPin] = useState(false);
+  const [mapsUrl, setMapsUrl] = useState(() => deliveryInfo?.mapsUrl || '');
+  const [hasCustomPin, setHasCustomPin] = useState(hasDeliveryCoords);
   const [isMapPickerOpen, setIsMapPickerOpen] = useState(false);
 
   const [selectedInstructions, setSelectedInstructions] = useState<string[]>([]);
@@ -239,6 +244,13 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
       return;
     }
 
+    const isRestaurantCoord = Math.abs(coords.lat - 12.9696) < 0.0001 && Math.abs(coords.lng - 80.2435) < 0.0001;
+    if (!hasCustomPin || isRestaurantCoord) {
+      setIsMapPickerOpen(true);
+      alert('📍 Please tap your exact building gate on the map so our delivery rider navigates directly to your doorstep.');
+      return;
+    }
+
     const finalName = useAccountDetails ? account.name.trim() : receiverName.trim();
     const finalPhone = useAccountDetails ? account.phone.trim() : receiverPhone.trim();
     const allInstructions = selectedInstructions.join(', ');
@@ -250,15 +262,8 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
       area.trim(),
     ].filter(Boolean).join(', ');
 
-    // Precise Google Maps Pin:
-    // If a custom pin was set or explicit mapsUrl exists without defaulting to the restaurant, use coords.
-    // Otherwise, generate a direct Google Maps search link for the customer's exact full address text.
-    const isRestaurantCoord = Math.abs(coords.lat - 12.9696) < 0.0001 && Math.abs(coords.lng - 80.2435) < 0.0001;
-    const finalMapsUrl = (mapsUrl && !mapsUrl.includes('12.9696,80.2435'))
-      ? mapsUrl
-      : (hasCustomPin && !isRestaurantCoord)
-      ? `https://maps.google.com/?q=${coords.lat},${coords.lng}`
-      : `https://maps.google.com/?q=${encodeURIComponent(fullAddress + ', Chennai')}`;
+    // Exact Turn-by-Turn GPS Navigation URL for the rider
+    const finalMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`;
 
     // Save to Saved Addresses storage strictly under registered phone
     saveAddress({
