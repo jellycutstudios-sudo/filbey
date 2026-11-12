@@ -45,6 +45,7 @@ export default function MapLocationPicker({
   const [address, setAddress] = useState<string>(initialAddress || 'Locating pin position...');
   const [isReverseGeocoding, setIsReverseGeocoding] = useState<boolean>(false);
   const [isLocatingGPS, setIsLocatingGPS] = useState<boolean>(false);
+  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
   const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -235,7 +236,7 @@ export default function MapLocationPicker({
     };
   }, []);
 
-  // Use current GPS with high accuracy
+  // Use current GPS with high accuracy & multi-sample filtering
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
       alert('Location services not available on this browser.');
@@ -243,36 +244,84 @@ export default function MapLocationPicker({
     }
 
     setIsLocatingGPS(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setIsLocatingGPS(false);
-        const { latitude, longitude } = pos.coords;
-        setCoords({ lat: latitude, lng: longitude });
+    let bestCoords: { lat: number; lng: number; accuracy: number } | null = null;
+    let watchId: number | null = null;
+
+    const finalize = () => {
+      if (watchId !== null) {
+        try { navigator.geolocation.clearWatch(watchId); } catch { /* ignore */ }
+      }
+      setIsLocatingGPS(false);
+      if (bestCoords) {
+        const { lat, lng, accuracy } = bestCoords;
+        setCoords({ lat, lng });
+        setGpsAccuracy(Math.round(accuracy));
         if (deliveryMarkerRef.current) {
-          deliveryMarkerRef.current.setLatLng([latitude, longitude]);
+          deliveryMarkerRef.current.setLatLng([lat, lng]);
         }
         if (mapInstanceRef.current) {
-          mapInstanceRef.current.flyTo([latitude, longitude], 17, { animate: true, duration: 1.2 });
+          mapInstanceRef.current.flyTo([lat, lng], 18, { animate: true, duration: 1.2 });
         }
-        triggerGeocode(latitude, longitude);
-      },
-      (err) => {
-        setIsLocatingGPS(false);
-        alert('Could not detect exact GPS position. Please check location permissions or click anywhere on the map.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
+        triggerGeocode(lat, lng);
       }
-    );
+    };
+
+    const timeoutTimer = setTimeout(() => {
+      finalize();
+    }, 5500);
+
+    try {
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+          if (!bestCoords || accuracy < bestCoords.accuracy) {
+            bestCoords = { lat: latitude, lng: longitude, accuracy };
+          }
+          // Exact doorstep satellite GPS lock (<= 25m accuracy)
+          if (accuracy <= 25) {
+            clearTimeout(timeoutTimer);
+            finalize();
+          }
+        },
+        () => {
+          clearTimeout(timeoutTimer);
+          setIsLocatingGPS(false);
+          if (bestCoords) finalize();
+          else alert('Could not get accurate GPS lock. Please tap your building directly on the map.');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    } catch {
+      clearTimeout(timeoutTimer);
+      setIsLocatingGPS(false);
+    }
   };
 
-  // Search places on map
+  // Search places or paste Google Maps link on map
   const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const q = searchQuery.trim();
     if (!q) return;
+
+    // Check if user pasted coordinates or a Google Maps link with coordinates
+    const coordMatch = q.match(/(-?\d+\.\d{3,})[,\s]+(-?\d+\.\d{3,})/);
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1]);
+      const lon = parseFloat(coordMatch[2]);
+      if (lat > 8 && lat < 15 && lon > 78 && lon < 82) {
+        setCoords({ lat, lng: lon });
+        setGpsAccuracy(5);
+        if (deliveryMarkerRef.current) deliveryMarkerRef.current.setLatLng([lat, lon]);
+        if (mapInstanceRef.current) mapInstanceRef.current.flyTo([lat, lon], 18, { animate: true, duration: 1 });
+        triggerGeocode(lat, lon);
+        setSearchQuery('');
+        return;
+      }
+    }
 
     setIsSearching(true);
     try {
@@ -298,7 +347,7 @@ export default function MapLocationPicker({
       deliveryMarkerRef.current.setLatLng([lat, lon]);
     }
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.flyTo([lat, lon], 17, { animate: true, duration: 1 });
+      mapInstanceRef.current.flyTo([lat, lon], 18, { animate: true, duration: 1 });
     }
     setSearchResults([]);
     setSearchQuery('');
@@ -360,7 +409,7 @@ export default function MapLocationPicker({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search apartment, street, landmark in Chennai..."
+              placeholder="Search building, street, or paste Google Maps link..."
               className="w-full pl-9 pr-20 py-2 bg-gray-100 rounded-xl text-xs font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-red-600 border border-transparent focus:border-red-600 transition-all"
             />
             <button
@@ -399,9 +448,20 @@ export default function MapLocationPicker({
             <span className="material-symbols-outlined text-amber-600 text-sm">touch_app</span>
             <span>Tap anywhere on the map or drag the pin directly</span>
           </span>
-          <span className="text-[10px] text-amber-700 font-extrabold uppercase tracking-wide bg-amber-100 px-1.5 py-0.5 rounded">
-            Click to Place
-          </span>
+          {gpsAccuracy !== null ? (
+            <span className={`text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded flex items-center gap-1 ${
+              gpsAccuracy <= 25 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-200 text-amber-950'
+            }`}>
+              <span className="material-symbols-outlined text-xs">
+                {gpsAccuracy <= 25 ? 'verified' : 'gps_fixed'}
+              </span>
+              <span>{gpsAccuracy <= 25 ? `±${gpsAccuracy}m Exact GPS` : `±${gpsAccuracy}m (Coarse GPS)`}</span>
+            </span>
+          ) : (
+            <span className="text-[10px] text-amber-700 font-extrabold uppercase tracking-wide bg-amber-100 px-1.5 py-0.5 rounded">
+              Click to Place
+            </span>
+          )}
         </div>
 
         {/* Interactive Map Canvas */}

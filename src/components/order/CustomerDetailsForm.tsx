@@ -551,16 +551,19 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
                 )}
               </div>
 
-              {/* Building / Street (Recommended) */}
+              {/* Building / Street & Landmark */}
               <div>
-                <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5">
-                  Street / Nearby Landmark <span className="text-gray-500 text-[10px] font-bold tracking-normal">(Optional)</span>
+                <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span>Street / Gate / Landmark</span>
+                  <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-200">
+                    Important for Rider
+                  </span>
                 </label>
                 <input
                   type="text"
                   value={buildingStreet}
                   onChange={(e) => setBuildingStreet(e.target.value)}
-                  placeholder="e.g. 2nd Cross Street, near Landmark"
+                  placeholder="e.g. Gate 2, Opp. Apollo Pharmacy, Behind Pillayar Kovil"
                   className="w-full px-3.5 py-3 bg-white rounded-xl border-2 border-gray-300 text-gray-950 text-sm font-semibold placeholder-gray-400 focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>
@@ -568,25 +571,33 @@ export default function CustomerDetailsForm({ onSubmit, onBack }: CustomerDetail
               {/* Area Card with Mini-Map Preview and "Change" Pin button (Screenshot 1) */}
               <div>
                 <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5">
-                  Area &amp; Delivery Zone
+                  Doorstep Pin &amp; Delivery Zone
                 </label>
-                <div className="bg-[#F8F9FB] rounded-2xl border-2 border-gray-300 p-3.5 flex items-center justify-between gap-3">
+                <div className={`rounded-2xl border-2 p-3.5 flex items-center justify-between gap-3 transition-colors ${
+                  hasCustomPin ? 'bg-[#F8F9FB] border-gray-300' : 'bg-amber-50/60 border-amber-300'
+                }`}>
                   <div className="flex-1 min-w-0 pr-1">
-                    <div className="flex items-center gap-1.5 text-xs font-black text-gray-500 uppercase tracking-wider mb-1">
-                      <span>{hasCustomPin ? 'GPS Pin Verified' : 'Delivery Area'}</span>
-                      <span className={`w-1.5 h-1.5 rounded-full ${hasCustomPin ? 'bg-emerald-600' : 'bg-amber-500'}`}></span>
+                    <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider mb-1">
+                      <span className={hasCustomPin ? 'text-emerald-800' : 'text-amber-900'}>
+                        {hasCustomPin ? 'Doorstep GPS Pin Verified ✓' : 'Pin Not Verified Yet'}
+                      </span>
+                      <span className={`w-2 h-2 rounded-full ${hasCustomPin ? 'bg-emerald-600 animate-pulse' : 'bg-amber-500'}`}></span>
                     </div>
                     <p className="text-xs font-bold text-gray-950 leading-relaxed line-clamp-2">
-                      {area || 'Tap on the right to set your exact doorstep pin on map'}
+                      {area || 'Please set your exact doorstep pin so the rider reaches your gate'}
                     </p>
-                    <div className="flex items-center gap-3 mt-1.5">
+                    <div className="flex items-center gap-3 mt-2">
                       <button
                         type="button"
                         onClick={() => setIsMapPickerOpen(true)}
-                        className="text-[11px] font-black text-red-600 hover:underline flex items-center gap-0.5 cursor-pointer"
+                        className={`text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition-all ${
+                          hasCustomPin 
+                            ? 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300' 
+                            : 'bg-red-600 hover:bg-red-700 text-white shadow-xs animate-bounce'
+                        }`}
                       >
-                        <span className="material-symbols-outlined text-xs">pin_drop</span>
-                        <span>{hasCustomPin ? 'Adjust Pin on Map' : 'Set Pin on Map'}</span>
+                        <span className="material-symbols-outlined text-sm">pin_drop</span>
+                        <span>{hasCustomPin ? 'Adjust Pin on Map' : 'Set Exact Pin on Map'}</span>
                       </button>
                       <button
                         type="button"

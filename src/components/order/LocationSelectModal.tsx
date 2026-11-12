@@ -195,62 +195,93 @@ export default function LocationSelectModal({
     }
 
     setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
-        let detected = '';
+    let bestPos: GeolocationPosition | null = null;
+    let watchId: number | null = null;
 
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
-            { headers: { 'Accept-Language': 'en' } }
-          );
-          const data = await res.json();
-          if (data && data.address) {
-            const parts = [
-              data.address.building || data.address.amenity || data.address.house_number,
-              data.address.road || data.address.pedestrian,
-              data.address.suburb || data.address.neighbourhood,
-              data.address.city_district || data.address.city || 'Chennai',
-              data.address.postcode ? `PIN: ${data.address.postcode}` : '',
-            ].filter(Boolean);
-            detected = parts.length > 0 ? parts.join(', ') : data.display_name;
-          } else if (data && data.display_name) {
-            detected = data.display_name;
-          } else {
-            detected = `GPS Pin: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-          }
-        } catch {
+    const finalize = async (pos: GeolocationPosition) => {
+      if (watchId !== null) {
+        try { navigator.geolocation.clearWatch(watchId); } catch { /* ignore */ }
+      }
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      let detected = '';
+
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+          { headers: { 'Accept-Language': 'en' } }
+        );
+        const data = await res.json();
+        if (data && data.address) {
+          const parts = [
+            data.address.building || data.address.amenity || data.address.house_number,
+            data.address.road || data.address.pedestrian,
+            data.address.suburb || data.address.neighbourhood,
+            data.address.city_district || data.address.city || 'Chennai',
+            data.address.postcode ? `PIN: ${data.address.postcode}` : '',
+          ].filter(Boolean);
+          detected = parts.length > 0 ? parts.join(', ') : data.display_name;
+        } else if (data && data.display_name) {
+          detected = data.display_name;
+        } else {
           detected = `GPS Pin: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
         }
+      } catch {
+        detected = `GPS Pin: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      }
 
+      setIsLocating(false);
+      // Open map picker with the pinpoint GPS position so the user verifies their exact doorstep
+      setCurrentCoords({ lat, lng });
+      setCurrentGpsAddress(detected);
+      setShowMapPicker(true);
+    };
+
+    const timeoutTimer = setTimeout(() => {
+      if (bestPos) {
+        finalize(bestPos);
+      } else {
         setIsLocating(false);
-        onSelectLocation({
-          area: detected || `GPS Pin: ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-          lat,
-          lng,
-          mapsUrl,
-        });
-        onClose();
-      },
-      (err) => {
-        setIsLocating(false);
-        alert('Please allow high-accuracy location permissions so we can pinpoint your delivery doorstep.');
-      },
-      { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 }
-    );
+        alert('GPS signal is taking time. Opening map so you can tap your building directly.');
+        setShowMapPicker(true);
+      }
+    }, 4500);
+
+    try {
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          if (!bestPos || pos.coords.accuracy < bestPos.coords.accuracy) {
+            bestPos = pos;
+          }
+          // Real satellite GPS lock (< 25m accuracy)
+          if (pos.coords.accuracy <= 25) {
+            clearTimeout(timeoutTimer);
+            finalize(pos);
+          }
+        },
+        () => {
+          clearTimeout(timeoutTimer);
+          setIsLocating(false);
+          if (bestPos) finalize(bestPos);
+          else {
+            alert('Please allow high-accuracy location permissions. Opening map to drop pin manually.');
+            setShowMapPicker(true);
+          }
+        },
+        { timeout: 8000, enableHighAccuracy: true, maximumAge: 0 }
+      );
+    } catch {
+      clearTimeout(timeoutTimer);
+      setIsLocating(false);
+      setShowMapPicker(true);
+    }
   };
 
   const handleSelectSearchResult = (res: LocationResult) => {
-    onSelectLocation({
-      area: res.formattedAddress,
-      lat: res.lat,
-      lng: res.lng,
-      mapsUrl: `https://maps.google.com/?q=${res.lat},${res.lng}`,
-    });
-    onClose();
+    // Do not close with a generic suburb center; open map picker to fine-tune doorstep!
+    setCurrentCoords({ lat: res.lat, lng: res.lng });
+    setCurrentGpsAddress(res.formattedAddress);
+    setShowMapPicker(true);
   };
 
   const handleSelectSaved = (saved: SavedAddress) => {

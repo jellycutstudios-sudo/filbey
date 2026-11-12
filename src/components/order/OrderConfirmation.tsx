@@ -51,10 +51,10 @@ function buildWhatsAppMessage(
     `🧾 *GST on Food (5%):* ₹${gstAmount}\n` +
     `✅ *Total to Pay:* ₹${total}\n\n` +
     `📍 *Delivery Address (${addressTag}):*\n` +
-    `🚪 *Flat / Floor:* ${customer.houseFlatFloor || customer.address}\n` +
-    (customer.buildingStreet ? `🏢 *Building / Street:* ${customer.buildingStreet}\n` : '') +
+    `🚪 *Flat / Floor / House:* ${customer.houseFlatFloor || customer.address}\n` +
+    (customer.buildingStreet ? `🏢 *Landmark / Gate:* ${customer.buildingStreet}\n` : '') +
     `🏙️ *Area:* ${customer.area || locationName}\n` +
-    `🗺️ *Google Maps Pin:* ${mapsLink}\n\n` +
+    `🗺️ *Rider Navigation Pin:* ${mapsLink}\n\n` +
     (customer.deliveryInstructions ? `📝 *Rider Instructions:* ${customer.deliveryInstructions}\n` : '') +
     `👤 *Receiver:* ${customer.name}\n` +
     `📞 *Phone:* +91 ${customer.phone}\n` +
